@@ -1,31 +1,32 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  LayoutDashboard, BookOpen, ClipboardList, BarChart3, Bell, LogOut,
-  Users, Database, Cpu, GraduationCap,
-} from 'lucide-react';
+import { LogOut, GraduationCap } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { serif } from '../../utils/helpers';
-import type { ActiveView } from '../../types';
+import { roleNavConfig, NavItem } from '../../config/navigation';
 
-export function Sidebar({ open }: { open: boolean }) {
+export function SideBar({ open }: { open: boolean }) {
   const { role, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   const safeRole = role || 'student';
+  const navItems = roleNavConfig[safeRole] || [];
 
-  const navItems: { id: ActiveView; icon: React.ElementType; label: string; path: string }[] = [
-    { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-    { id: 'courses', icon: BookOpen, label: 'Courses', path: '/courses' },
-    { id: 'assignments', icon: ClipboardList, label: 'Assignments', path: '/assignments' },
-    { id: 'grades', icon: BarChart3, label: 'Grades', path: '/grades' },
-    { id: 'announcements', icon: Bell, label: 'Announcements', path: '/announcements' },
-  ];
+  // Group items by section
+  const sections = navItems.reduce((acc, item) => {
+    const section = item.section || 'Other';
+    if (!acc[section]) acc[section] = [];
+    acc[section].push(item);
+    return acc;
+  }, {} as Record<string, NavItem[]>);
 
   const currentPath = location.pathname;
-  const activeItem = navItems.find(item => 
-    item.path === '/' ? currentPath === '/' : currentPath.startsWith(item.path)
-  )?.id || 'dashboard';
+
+  // Determine if a nav item is active (exact match or starts with path)
+  const isActive = (item: NavItem) => {
+    if (item.path === '/') return currentPath === '/';
+    return currentPath.startsWith(item.path);
+  };
 
   const roleAccent: Record<string, string> = { student: '#C4582A', lecturer: '#4A8A5C', admin: '#4470B4' };
   const roleInitials: Record<string, string> = { student: 'AF', lecturer: 'SC', admin: 'SR' };
@@ -36,6 +37,7 @@ export function Sidebar({ open }: { open: boolean }) {
     <aside
       className={`${open ? 'w-56' : 'w-[60px]'} flex-shrink-0 flex flex-col border-r border-border transition-all duration-300 overflow-hidden bg-sidebar`}
     >
+      {/* Header */}
       <div className="h-16 flex items-center px-4 border-b border-sidebar-border gap-3 flex-shrink-0">
         <div className="w-8 h-8 flex-shrink-0 bg-primary rounded-lg flex items-center justify-center">
           <GraduationCap size={15} className="text-primary-foreground" />
@@ -48,49 +50,39 @@ export function Sidebar({ open }: { open: boolean }) {
         )}
       </div>
 
-      <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
-        {navItems.map((item) => {
-          const active = activeItem === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => navigate(item.path)}
-              title={!open ? item.label : undefined}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${
-                active
-                  ? 'bg-primary/15 text-primary font-semibold'
-                  : 'text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground'
-              }`}
-            >
-              <item.icon size={16} className="flex-shrink-0" />
-              {open && <span className="text-sm truncate">{item.label}</span>}
-              {open && active && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />}
-            </button>
-          );
-        })}
+      {/* Navigation */}
+      <nav className="flex-1 py-3 px-2 overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
+        {Object.entries(sections).map(([section, items]) => (
+          <div key={section} className="mb-4">
+            {open && (
+              <div className="px-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
+                {section}
+              </div>
+            )}
+            {items.map((item) => {
+              const active = isActive(item);
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => navigate(item.path)}
+                  title={!open ? item.label : undefined}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${
+                    active
+                      ? 'bg-primary/15 text-primary font-semibold'
+                      : 'text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground'
+                  }`}
+                >
+                  <item.icon size={16} className="flex-shrink-0" />
+                  {open && <span className="text-sm truncate">{item.label}</span>}
+                  {open && active && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />}
+                </button>
+              );
+            })}
+          </div>
+        ))}
       </nav>
 
-      {open && safeRole === 'admin' && (
-        <div className="px-2 pb-1">
-          <div className="border-t border-sidebar-border pt-3 pb-1">
-            <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-widest px-3 mb-2">Admin Tools</p>
-            {[
-              { icon: Users, label: 'User Management' },
-              { icon: Database, label: 'System Logs' },
-              { icon: Cpu, label: 'Server Status' },
-            ].map(item => (
-              <button
-                key={item.label}
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-all"
-              >
-                <item.icon size={14} className="flex-shrink-0" />
-                <span className="text-xs truncate">{item.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
+      {/* User profile */}
       <div className="border-t border-sidebar-border p-3 mt-auto">
         <div className={`flex items-center gap-2.5 ${open ? '' : 'justify-center'}`}>
           <div

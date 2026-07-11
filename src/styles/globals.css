@@ -1,0 +1,104 @@
+/* ─── React Big Calendar Theme Overrides ─── */
+.rbc-calendar {
+  background-color: var(--card) !important;
+  color: var(--foreground) !important;
+}
+
+.rbc-month-view,
+.rbc-time-view,
+.rbc-agenda-view {
+  background-color: var(--card) !important;
+}
+
+.rbc-header {
+  color: var(--muted-foreground) !important;
+  background-color: var(--secondary) !important;
+  padding: 8px 4px !important;
+  font-weight: 600 !important;
+}
+
+.rbc-off-range-bg {
+  background-color: var(--secondary) !important;
+}
+
+.rbc-day-bg {
+  background-color: var(--card) !important;
+}
+
+.rbc-today {
+  background-color: var(--primary/10) !important;
+}
+
+.rbc-event {
+  border-radius: 4px !important;
+  border: none !important;
+  padding: 2px 6px !important;
+}
+
+.rbc-event-content {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+}
+
+.rbc-toolbar {
+  margin-bottom: 16px !important;
+}
+
+.rbc-toolbar button {
+  color: var(--muted-foreground) !important;
+  background: var(--secondary) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+  padding: 6px 14px !important;
+  font-size: 13px !important;
+  transition: all 0.2s !important;
+}
+
+.rbc-toolbar button:hover {
+  background: var(--accent) !important;
+  color: var(--foreground) !important;
+}
+
+.rbc-toolbar button.rbc-active {
+  background: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  border-color: var(--primary) !important;
+}
+
+.rbc-toolbar-label {
+  font-family: 'DM Serif Display', serif !important;
+  font-size: 1.2rem !important;
+  font-weight: 400 !important;
+  color: var(--foreground) !important;
+}
+
+.rbc-date-cell {
+  color: var(--foreground) !important;
+}
+
+.rbc-date-cell .rbc-now {
+  color: var(--primary) !important;
+  font-weight: 700 !important;
+}
+
+.rbc-current-time-indicator {
+  background-color: var(--primary) !important;
+}
+
+.rbc-agenda-view table.rbc-agenda-table {
+  background: var(--card) !important;
+  color: var(--foreground) !important;
+}
+
+.rbc-agenda-view table.rbc-agenda-table thead {
+  background: var(--secondary) !important;
+  color: var(--muted-foreground) !important;
+}
+
+.rbc-agenda-view table.rbc-agenda-table tbody tr {
+  border-bottom: 1px solid var(--border) !important;
+}
+
+.rbc-agenda-view table.rbc-agenda-table tbody tr:hover {
+  background: var(--secondary) !important;
+}

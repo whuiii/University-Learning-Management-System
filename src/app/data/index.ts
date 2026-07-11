@@ -74,3 +74,162 @@ export const MATERIALS: Material[] = [
   { id: "m4", type: "pdf", title: "Lecture 7: Heaps & Priority Queues", size: "3.1 MB", date: "Jan 27" },
   { id: "m5", type: "video", title: "Heap Sort Demo & Analysis", duration: "18 min", date: "Jan 27" },
 ];
+
+export const QUIZZES = [
+  // CS201
+  {
+    id: 'q1',
+    courseId: 'cs201',
+    title: 'Quiz 1: Big-O & Arrays',
+    dueDate: '2025-02-20',
+    duration: 30, // minutes
+    totalQuestions: 10,
+    status: 'available', // 'upcoming' | 'available' | 'completed' | 'graded'
+    score: null, // or number if graded
+    attempts: 1,
+    maxAttempts: 2,
+  },
+  {
+    id: 'q2',
+    courseId: 'cs201',
+    title: 'Quiz 2: Trees & Recursion',
+    dueDate: '2025-03-05',
+    duration: 45,
+    totalQuestions: 12,
+    status: 'upcoming',
+    score: null,
+    attempts: 0,
+    maxAttempts: 1,
+  },
+  // CS302
+  {
+    id: 'q3',
+    courseId: 'cs302',
+    title: 'Agile & Scrum Fundamentals',
+    dueDate: '2025-02-15',
+    duration: 20,
+    totalQuestions: 8,
+    status: 'graded',
+    score: 88,
+    attempts: 1,
+    maxAttempts: 1,
+  },
+  {
+    id: 'q4',
+    courseId: 'cs302',
+    title: 'UML & Requirements Engineering',
+    dueDate: '2025-03-01',
+    duration: 30,
+    totalQuestions: 10,
+    status: 'available',
+    score: null,
+    attempts: 0,
+    maxAttempts: 2,
+  },
+  // CS301
+  {
+    id: 'q5',
+    courseId: 'cs301',
+    title: 'SQL Joins & Subqueries',
+    dueDate: '2025-02-12',
+    duration: 25,
+    totalQuestions: 10,
+    status: 'completed',
+    score: null, // not graded yet
+    attempts: 1,
+    maxAttempts: 1,
+  },
+  // CS401
+  {
+    id: 'q6',
+    courseId: 'cs401',
+    title: 'Network Models & OSI',
+    dueDate: '2025-02-18',
+    duration: 30,
+    totalQuestions: 15,
+    status: 'upcoming',
+    score: null,
+    attempts: 0,
+    maxAttempts: 1,
+  },
+];
+
+
+// Add these after existing exports
+
+export interface ClassSchedule {
+  id: string;
+  courseId: string;
+  courseCode: string;
+  title: string;
+  date: string; // YYYY-MM-DD
+  startTime: string; // HH:MM
+  endTime: string;
+  room: string;
+  location: { lat: number; lng: number };
+}
+
+export const CLASS_SCHEDULE: ClassSchedule[] = [
+  {
+    id: 'cs201-1',
+    courseId: 'cs201',
+    courseCode: 'CS201',
+    title: 'Data Structures Lab',
+    date: '2026-07-15',
+    startTime: '10:00',
+    endTime: '12:00',
+    room: 'Lab B',
+    location: { lat: 3.139, lng: 101.686 },
+  },
+  {
+    id: 'cs201-2',
+    courseId: 'cs201',
+    courseCode: 'CS201',
+    title: 'Data Structures Lecture',
+    date: '2026-07-17',
+    startTime: '09:00',
+    endTime: '11:00',
+    room: 'DK3',
+    location: { lat: 3.140, lng: 101.687 },
+  },
+  {
+    id: 'cs302-1',
+    courseId: 'cs302',
+    courseCode: 'CS302',
+    title: 'Software Engineering Tutorial',
+    date: '2026-07-16',
+    startTime: '14:00',
+    endTime: '16:00',
+    room: 'Room 301',
+    location: { lat: 3.138, lng: 101.685 },
+  },
+  {
+    id: 'cs301-1',
+    courseId: 'cs301',
+    courseCode: 'CS301',
+    title: 'Database Systems Lecture',
+    date: '2026-07-14',
+    startTime: '08:00',
+    endTime: '10:00',
+    room: 'DK2',
+    location: { lat: 3.139, lng: 101.686 },
+  },
+  {
+    id: 'cs401-1',
+    courseId: 'cs401',
+    courseCode: 'CS401',
+    title: 'Computer Networks Lab',
+    date: '2026-07-13',
+    startTime: '13:00',
+    endTime: '15:00',
+    room: 'Lab C',
+    location: { lat: 3.141, lng: 101.688 },
+  },
+];
+
+// Mock attendance records (student-specific)
+export const ATTENDANCE_RECORDS: Record<string, 'present' | 'absent'> = {
+  'cs201-1': 'present',
+  'cs301-1': 'absent',
+  'cs401-1': 'present',
+};

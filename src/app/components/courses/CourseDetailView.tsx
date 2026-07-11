@@ -11,9 +11,11 @@ import {
   ThumbsUp,
 } from 'lucide-react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
-import { COURSES, ASSIGNMENTS, MATERIALS, GRADE_HISTORY } from '../../data';
+import { COURSES, ASSIGNMENTS, MATERIALS, GRADE_HISTORY, QUIZZES } from '../../data';
 import { statusBg, statusColor, statusLabel, serif, mono } from '../../utils/helpers';
 import { useTheme } from '../../contexts/ThemeContext';
+import { toast } from 'sonner';
+import { Button } from '../../components/ui/button';
 
 export function CourseDetailView() {
   const { courseId } = useParams<{ courseId: string }>();
@@ -34,12 +36,13 @@ export function CourseDetailView() {
   };
 
   const tabs = [
-    { id: 'overview', label: 'Overview' },
-    { id: 'materials', label: 'Materials' },
-    { id: 'assignments', label: 'Assignments' },
-    { id: 'grades', label: 'Grades' },
-    { id: 'discussion', label: 'Discussion' },
-  ];
+  { id: 'overview', label: 'Overview' },
+  { id: 'materials', label: 'Materials' },
+  { id: 'assignments', label: 'Assignments' },
+  { id: 'quizzes', label: 'Quizzes' },   // new
+  { id: 'grades', label: 'Grades' },
+  { id: 'discussion', label: 'Discussion' },
+];
 
   const courseAssignments = ASSIGNMENTS.filter((a) => a.courseId === course.id);
 
@@ -222,6 +225,73 @@ export function CourseDetailView() {
               </div>
             ))
           )}
+        </div>
+      )}
+
+      {tab === 'quizzes' && (
+        <div className="space-y-3">
+          {(() => {
+            const courseQuizzes = QUIZZES.filter((q) => q.courseId === course.id);
+            if (courseQuizzes.length === 0) {
+              return (
+                <div className="bg-card border border-border rounded-2xl p-10 text-center text-muted-foreground text-sm">
+                  No quizzes available for this course yet.
+                </div>
+              );
+            }
+            return courseQuizzes.map((q) => {
+              const statusColor = {
+                upcoming: 'text-blue-500',
+                available: 'text-emerald-500',
+                completed: 'text-amber-500',
+                graded: 'text-sky-400',
+              }[q.status];
+
+              const statusLabel = {
+                upcoming: 'Upcoming',
+                available: 'Available',
+                completed: 'Submitted',
+                graded: 'Graded',
+              }[q.status];
+
+              const canStart = q.status === 'available' || q.status === 'upcoming';
+
+              return (
+                <div
+                  key={q.id}
+                  className="bg-card border border-border rounded-2xl p-5 flex items-center gap-4 hover:border-primary/20 transition-colors"
+                >
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${statusColor} bg-opacity-10`}>
+                    <FileText size={16} className={statusColor} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm text-foreground">{q.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {q.duration} min · {q.totalQuestions} questions · Due {q.dueDate}
+                      {q.attempts > 0 && ` · Attempts: ${q.attempts}/${q.maxAttempts}`}
+                    </p>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className={`text-xs font-bold ${statusColor}`}>{statusLabel}</p>
+                    {q.status === 'graded' && q.score !== null && (
+                      <p className="text-2xl font-light text-foreground mt-0.5" style={{ fontFamily: serif }}>
+                        {q.score}%
+                      </p>
+                    )}
+                    {canStart && (
+                      <Button
+                        size="sm"
+                        className="mt-1"
+                        onClick={() => toast.info(`Starting quiz: ${q.title}`)}
+                      >
+                        {q.attempts > 0 ? 'Resume' : 'Start'}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              );
+            });
+          })()}
         </div>
       )}
 
