@@ -1,0 +1,1 @@
+export { LecturerDashboard } from "./LecturerDashboard";
