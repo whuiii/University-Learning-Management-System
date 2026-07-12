@@ -55,7 +55,7 @@ export function StudentSettings() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-7xl mx-auto space-y-6">
       {/* Page header */}
       <div>
         <h1 className="text-2xl font-normal text-foreground" style={{ fontFamily: serif }}>

@@ -22,7 +22,7 @@ export function LecturerDashboard() {
   }));
 
   return (
-    <div className="space-y-7 max-w-6xl">
+    <div className="max-w-7xl mx-auto space-y-6">
       <div>
         <p className="text-xs text-muted-foreground mb-1.5 tracking-wide">
           {new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}

@@ -39,21 +39,17 @@ export const roleNavConfig: Record<Role, NavItem[]> = {
     // Dashboard
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/', section: 'Overview' },
     // Course Management
-    { id: 'my-courses', label: 'My Courses', icon: BookOpen, path: '/lecturer/courses', section: 'Course Management' },
-    { id: 'manage-materials', label: 'Course Materials', icon: FileText, path: '/lecturer/materials', section: 'Course Management' },
+    { id: 'my-courses', label: 'My Courses', icon: BookOpen, path: '/lecturer/courses', section: 'Course Management' }, 
+    
     // Assessment
-    { id: 'manage-assignments', label: 'Assignments', icon: ClipboardList, path: '/lecturer/assignments', section: 'Assessment' },
-    { id: 'quiz-bank', label: 'Quiz Bank', icon: ListChecks, path: '/lecturer/quizzes', section: 'Assessment' },
     { id: 'grade-submissions', label: 'Grade Submissions', icon: FileCheck, path: '/lecturer/grading', section: 'Assessment' },
     // Communication
-    { id: 'announcements', label: 'Announcements', icon: Bell, path: '/announcements', section: 'Communication' },
     { id: 'discussions', label: 'Discussions', icon: MessageCircle, path: '/discussions', section: 'Communication' },
-    { id: 'student-questions', label: 'Student Questions', icon: HelpCircle, path: '/lecturer/questions', section: 'Communication' },
     // Analytics
     { id: 'performance', label: 'Student Performance', icon: TrendingUp, path: '/lecturer/performance', section: 'Analytics' },
-    { id: 'attendance-reports', label: 'Attendance Reports', icon: Clock, path: '/lecturer/attendance', section: 'Analytics' },
+    { id: 'attendance-reports', label: 'Attendance', icon: Clock, path: '/lecturer/attendance', section: 'Analytics' },
     // Settings
-    { id: 'settings', label: 'Settings', icon: Settings, path: '/settings', section: 'Tools' },
+    { id: 'settings', label: 'Settings', icon: Settings, path: '/lecturer/settings', section: 'Tools' },
   ],
   admin: [
     // Dashboard

@@ -44,8 +44,8 @@ export function SideBar({ open }: { open: boolean }) {
         </div>
         {open && (
           <div className="min-w-0">
-            <p className="font-bold text-sidebar-foreground text-sm leading-none" style={{ fontFamily: serif }}>UTN Portal</p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">Learning Management</p>
+            <p className="font-bold text-sidebar-foreground text-sm leading-none" style={{ fontFamily: serif }}>UTP Learning Portal</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">Universiti Teknologi PETRONAS</p>
           </div>
         )}
       </div>

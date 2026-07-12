@@ -1,1 +1,11 @@
-export { AdminDashboard } from "./AdminDashboard";
+export { AdminDashboard } from './AdminDashboard';
+// export { AdminUserManagement } from './AdminUserManagement';
+export { AdminRoles } from './AdminRoles';
+export { AdminCourses } from './AdminCourses';
+export { AdminSemesters } from './AdminSemesters';
+export { AdminSISIntegration } from './AdminSISIntegration';
+export { AdminSecurity } from './AdminSecurity';
+export { AdminAuditLogs } from './AdminAuditLogs';
+export { AdminReports } from './AdminReports';
+export { AdminSystemMonitor } from './AdminSystemMonitor';
+export { AdminSettings } from './AdminSettings';

@@ -19,7 +19,6 @@ import { Plus, Trash2 } from 'lucide-react';
 import { ASSIGNMENTS } from '../../data';
 import { serif } from '../../utils/helpers';
 
-
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 const localizer = momentLocalizer(moment);

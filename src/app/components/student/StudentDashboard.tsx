@@ -70,7 +70,7 @@ export function StudentDashboard() {
   };
 
   return (
-    <div className="space-y-7 max-w-6xl">
+    <div className="max-w-7xl mx-auto space-y-6">
       {/* Welcome */}
       <div className="flex items-start justify-between gap-4">
         <div>

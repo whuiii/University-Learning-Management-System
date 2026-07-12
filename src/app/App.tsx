@@ -3,16 +3,26 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LoginPage } from './components/common';
 import { ProtectedLayout } from './layouts/ProtectedLayout';
-import { StudentDashboard, StudentSettings, StudentCalendar } from './components/student';
-import { LecturerDashboard } from './components/lecturer';
+import { StudentDashboard, StudentSettings, StudentCalendar, StudentAttendance } from './components/student';
+import { LecturerDashboard, LecturerCourses, LecturerCourseDetail, LecturerSettings, LecturerAttendanceSessions, LecturerAttendanceSessionDetail, LecturerAttendanceMatrix, LecturerStudentPerformance } from './components/lecturer';
 import { AdminDashboard } from './components/admin';
+import {
+  AdminRoles,
+  AdminCourses,
+  AdminSemesters,
+  AdminSISIntegration,
+  AdminSecurity,
+  AdminAuditLogs,
+  AdminReports,
+  AdminSystemMonitor,
+  AdminSettings,
+} from './components/admin';
 import { CoursesView, CourseDetailView } from './components/courses';
 import { AssignmentsView } from './components/assignments';
 import { GradesView } from './components/grades';
 import { AnnouncementsView } from './components/announcements';
 import { Toaster } from 'sonner';
 import { PlaceholderPage } from './components/common/PlaceholderPage';
-import { StudentAttendance } from './components/student/StudentAttendance';
 
 function AppRoutes() {
   const { role } = useAuth();
@@ -40,25 +50,25 @@ function AppRoutes() {
           <Route path="settings" element={<StudentSettings />} />
 
           // Lecturer routes (with /lecturer prefix)
-          <Route path="lecturer/courses" element={<PlaceholderPage />} />
-          <Route path="lecturer/materials" element={<PlaceholderPage />} />
-          <Route path="lecturer/assignments" element={<PlaceholderPage />} />
-          <Route path="lecturer/quizzes" element={<PlaceholderPage />} />
+          <Route path="lecturer/courses" element={<LecturerCourses />} />
+          <Route path="lecturer/courses/:courseId" element={<LecturerCourseDetail />} />
           <Route path="lecturer/grading" element={<PlaceholderPage />} />
           <Route path="lecturer/questions" element={<PlaceholderPage />} />
-          <Route path="lecturer/performance" element={<PlaceholderPage />} />
-          <Route path="lecturer/attendance" element={<PlaceholderPage />} />
+          <Route path="lecturer/performance" element={<LecturerStudentPerformance />} />
+          <Route path="lecturer/attendance" element={<LecturerAttendanceSessions />} />
+          <Route path="lecturer/attendance/session/:courseId/:type" element={<LecturerAttendanceSessionDetail />} />
+          <Route path="lecturer/settings" element={<LecturerSettings />} />
 
           // Admin routes (with /admin prefix)
-          <Route path="admin/users" element={<PlaceholderPage />} />
-          <Route path="admin/roles" element={<PlaceholderPage />} />
-          <Route path="admin/courses" element={<PlaceholderPage />} />
-          <Route path="admin/semesters" element={<PlaceholderPage />} />
-          <Route path="admin/sis" element={<PlaceholderPage />} />
-          <Route path="admin/security" element={<PlaceholderPage />} />
-          <Route path="admin/audit" element={<PlaceholderPage />} />
-          <Route path="admin/reports" element={<PlaceholderPage />} />
-          <Route path="admin/system" element={<PlaceholderPage />} />
+        <Route path="admin/roles" element={<AdminRoles />} />
+        <Route path="admin/courses" element={<AdminCourses />} />
+        <Route path="admin/semesters" element={<AdminSemesters />} />
+        <Route path="admin/sis" element={<AdminSISIntegration />} />
+        <Route path="admin/security" element={<AdminSecurity />} />
+        <Route path="admin/audit" element={<AdminAuditLogs />} />
+        <Route path="admin/reports" element={<AdminReports />} />
+        <Route path="admin/system" element={<AdminSystemMonitor />} />
+        <Route path="settings" element={<AdminSettings />} /> /
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

@@ -1,6 +1,9 @@
 import type { Course, Assignment, Announcement, GradeHistoryEntry, Material } from "../types";
 
+// ─── data/index.ts ───
+
 export const COURSES: Course[] = [
+  // ─── Existing courses ──────────────────────────────────
   {
     id: "cs201", code: "CS201",
     title: "Data Structures & Algorithms",
@@ -40,6 +43,80 @@ export const COURSES: Course[] = [
     color: "#4470B4", image: "photo-1558494949-ef010cbdcc31",
     modules: 11, completedModules: 4, nextClass: "Thu 3:00 PM",
     description: "Network architectures, OSI and TCP/IP models, routing protocols, security fundamentals, and Cisco Packet Tracer labs.",
+  },
+
+  // ─── New courses for Dr. Sarah Chen ──────────────────
+  {
+    id: "cs202", code: "CS202",
+    title: "Advanced Data Structures",
+    lecturer: "Dr. Sarah Chen",
+    faculty: "Computer Science", semester: "2024/25 Sem 2",
+    enrolled: 28, progress: 45, grade: "B+", gradeValue: 81,
+    color: "#E87A4A", image: "photo-1516259762381-22954d7d3ad2",
+    modules: 10, completedModules: 4, nextClass: "Wed 11:00 AM",
+    description: "In-depth study of advanced data structures including balanced trees, tries, and graph algorithms. Emphasis on performance and real-world applications.",
+  },
+  {
+    id: "cs203", code: "CS203",
+    title: "Algorithm Design & Analysis",
+    lecturer: "Dr. Sarah Chen",
+    faculty: "Computer Science", semester: "2024/25 Sem 2",
+    enrolled: 35, progress: 60, grade: "A−", gradeValue: 86,
+    color: "#C87A2A", image: "photo-1509228468518-180dd4864904",
+    modules: 13, completedModules: 8, nextClass: "Fri 9:00 AM",
+    description: "Techniques for designing efficient algorithms: divide-and-conquer, dynamic programming, greedy algorithms, and NP-completeness. Includes proof of correctness and complexity analysis.",
+  },
+  {
+    id: "cs204", code: "CS204",
+    title: "AI & Machine Learning Fundamentals",
+    lecturer: "Dr. Sarah Chen",
+    faculty: "Computer Science", semester: "2024/25 Sem 2",
+    enrolled: 40, progress: 30, grade: "B", gradeValue: 75,
+    color: "#5A8A6A", image: "photo-1555949963-ff9fe0c870eb",
+    modules: 16, completedModules: 5, nextClass: "Tue 10:00 AM",
+    description: "Introduction to artificial intelligence and machine learning: search algorithms, neural networks, decision trees, and reinforcement learning. Hands-on projects using Python and TensorFlow.",
+  },
+  {
+    id: "cs205", code: "CS205",
+    title: "Cybersecurity & Network Defense",
+    lecturer: "Dr. Sarah Chen",
+    faculty: "Computer Science", semester: "2024/25 Sem 2",
+    enrolled: 32, progress: 25, grade: "B+", gradeValue: 80,
+    color: "#3A6A8A", image: "photo-1558494949-ef010cbdcc31",
+    modules: 14, completedModules: 3, nextClass: "Mon 2:00 PM",
+    description: "Fundamentals of cybersecurity: cryptography, network security, firewalls, intrusion detection, and ethical hacking. Practical labs with security tools and real-world case studies.",
+  },
+
+  // ─── Additional courses for other lecturers ──────────
+  {
+    id: "cs303", code: "CS303",
+    title: "Cloud Computing & DevOps",
+    lecturer: "Prof. Mohd Raza bin Ismail",
+    faculty: "Computer Science", semester: "2024/25 Sem 2",
+    enrolled: 30, progress: 50, grade: "A−", gradeValue: 84,
+    color: "#D4A230", image: "photo-1544383835-bda2bc66a55d",
+    modules: 12, completedModules: 6, nextClass: "Thu 11:00 AM",
+    description: "Cloud infrastructure, virtualization, containerization (Docker, Kubernetes), CI/CD pipelines, and DevOps practices. Hands-on with AWS, Azure, or GCP.",
+  },
+  {
+    id: "cs304", code: "CS304",
+    title: "Mobile App Development",
+    lecturer: "Dr. Priya Narayanan",
+    faculty: "Computer Science", semester: "2024/25 Sem 2",
+    enrolled: 33, progress: 68, grade: "A", gradeValue: 90,
+    color: "#4A8A5C", image: "photo-1522071820081-009f0129c71c",
+    modules: 15, completedModules: 10, nextClass: "Fri 1:00 PM",
+    description: "Development of cross-platform mobile applications using React Native and Flutter. Covers UI/UX design, state management, and native device integration.",
+  },
+  {
+    id: "cs402", code: "CS402",
+    title: "Data Science & Big Data Analytics",
+    lecturer: "Dr. James Okafor",
+    faculty: "Computer Science", semester: "2024/25 Sem 2",
+    enrolled: 28, progress: 35, grade: "B+", gradeValue: 79,
+    color: "#4470B4", image: "photo-1558494949-ef010cbdcc31",
+    modules: 13, completedModules: 4, nextClass: "Tue 3:00 PM",
+    description: "Introduction to data science: data wrangling, exploratory analysis, statistical modeling, and big data technologies like Hadoop and Spark. Project-based learning.",
   },
 ];
 
@@ -154,8 +231,7 @@ export const QUIZZES = [
   },
 ];
 
-
-// Add these after existing exports
+// ─── CLASS SCHEDULE (with address) ───────────────────────────────
 
 export interface ClassSchedule {
   id: string;
@@ -166,70 +242,332 @@ export interface ClassSchedule {
   startTime: string; // HH:MM
   endTime: string;
   room: string;
-  location: { lat: number; lng: number };
+  location: {
+    lat: number;
+    lng: number;
+    address: string; // ✅ human‑readable address
+  };
+  type: 'lecture' | 'lab' | 'tutorial';
 }
 
 export const CLASS_SCHEDULE: ClassSchedule[] = [
+  // ─── Today's test sessions ──────────────────────────────
+  {
+    id: 'test-today-1',
+    courseId: 'cs201',
+    courseCode: 'CS201',
+    title: 'Today’s Lecture – Testing',
+    date: new Date().toISOString().split('T')[0],
+    startTime: '18:00',
+    endTime: '20:00',
+    room: 'DK3',
+    location: { lat: 3.140, lng: 101.687, address: 'DK3, Faculty of Computer Science, UTM' },
+    type: 'lecture',
+  },
+  {
+    id: 'test-today-2',
+    courseId: 'cs302',
+    courseCode: 'CS302',
+    title: 'Today’s Lab Session',
+    date: new Date().toISOString().split('T')[0],
+    startTime: '14:00',
+    endTime: '16:00',
+    room: 'Lab B',
+    location: { lat: 3.139, lng: 101.686, address: 'Lab B, Faculty of Computer Science, UTM' },
+    type: 'lab',
+  },
+
+  // ─── Week 1 ──────────────────────────────────────────────
   {
     id: 'cs201-1',
     courseId: 'cs201',
     courseCode: 'CS201',
-    title: 'Data Structures Lab',
-    date: '2026-07-15',
-    startTime: '10:00',
-    endTime: '12:00',
-    room: 'Lab B',
-    location: { lat: 3.139, lng: 101.686 },
+    title: 'Lecture 1: Introduction',
+    date: '2026-07-13',
+    startTime: '09:00',
+    endTime: '11:00',
+    room: 'DK3',
+    location: { lat: 3.140, lng: 101.687, address: 'DK3, Faculty of Computer Science, UTM' },
+    type: 'lecture',
   },
   {
     id: 'cs201-2',
     courseId: 'cs201',
     courseCode: 'CS201',
-    title: 'Data Structures Lecture',
-    date: '2026-07-17',
+    title: 'Lab 1: Environment Setup',
+    date: '2026-07-14',
+    startTime: '10:00',
+    endTime: '12:00',
+    room: 'Lab B',
+    location: { lat: 3.139, lng: 101.686, address: 'Lab B, Faculty of Computer Science, UTM' },
+    type: 'lab',
+  },
+  {
+    id: 'cs201-3',
+    courseId: 'cs201',
+    courseCode: 'CS201',
+    title: 'Tutorial 1: Algorithm Analysis',
+    date: '2026-07-15',
+    startTime: '14:00',
+    endTime: '15:30',
+    room: 'Room 301',
+    location: { lat: 3.138, lng: 101.685, address: 'Room 301, Faculty of Computer Science, UTM' },
+    type: 'tutorial',
+  },
+
+  // ─── Week 2 ──────────────────────────────────────────────
+  {
+    id: 'cs201-4',
+    courseId: 'cs201',
+    courseCode: 'CS201',
+    title: 'Lecture 2: Data Structures',
+    date: '2026-07-20',
     startTime: '09:00',
     endTime: '11:00',
     room: 'DK3',
-    location: { lat: 3.140, lng: 101.687 },
+    location: { lat: 3.140, lng: 101.687, address: 'DK3, Faculty of Computer Science, UTM' },
+    type: 'lecture',
   },
   {
-    id: 'cs302-1',
-    courseId: 'cs302',
-    courseCode: 'CS302',
-    title: 'Software Engineering Tutorial',
-    date: '2026-07-16',
+    id: 'cs201-5',
+    courseId: 'cs201',
+    courseCode: 'CS201',
+    title: 'Lab 2: Implementation',
+    date: '2026-07-21',
+    startTime: '10:00',
+    endTime: '12:00',
+    room: 'Lab B',
+    location: { lat: 3.139, lng: 101.686, address: 'Lab B, Faculty of Computer Science, UTM' },
+    type: 'lab',
+  },
+  {
+    id: 'cs201-6',
+    courseId: 'cs201',
+    courseCode: 'CS201',
+    title: 'Tutorial 2: Complexity Analysis',
+    date: '2026-07-22',
     startTime: '14:00',
-    endTime: '16:00',
+    endTime: '15:30',
     room: 'Room 301',
-    location: { lat: 3.138, lng: 101.685 },
+    location: { lat: 3.138, lng: 101.685, address: 'Room 301, Faculty of Computer Science, UTM' },
+    type: 'tutorial',
+  },
+
+  // ─── Week 3 ──────────────────────────────────────────────
+  {
+    id: 'cs201-7',
+    courseId: 'cs201',
+    courseCode: 'CS201',
+    title: 'Lecture 3: Trees & Recursion',
+    date: '2026-07-27',
+    startTime: '09:00',
+    endTime: '11:00',
+    room: 'DK3',
+    location: { lat: 3.140, lng: 101.687, address: 'DK3, Faculty of Computer Science, UTM' },
+    type: 'lecture',
   },
   {
-    id: 'cs301-1',
-    courseId: 'cs301',
-    courseCode: 'CS301',
-    title: 'Database Systems Lecture',
-    date: '2026-07-14',
-    startTime: '08:00',
-    endTime: '10:00',
-    room: 'DK2',
-    location: { lat: 3.139, lng: 101.686 },
+    id: 'cs201-8',
+    courseId: 'cs201',
+    courseCode: 'CS201',
+    title: 'Lab 3: Tree Traversal',
+    date: '2026-07-28',
+    startTime: '10:00',
+    endTime: '12:00',
+    room: 'Lab B',
+    location: { lat: 3.139, lng: 101.686, address: 'Lab B, Faculty of Computer Science, UTM' },
+    type: 'lab',
   },
   {
-    id: 'cs401-1',
-    courseId: 'cs401',
-    courseCode: 'CS401',
-    title: 'Computer Networks Lab',
-    date: '2026-07-13',
-    startTime: '13:00',
-    endTime: '15:00',
-    room: 'Lab C',
-    location: { lat: 3.141, lng: 101.688 },
+    id: 'cs201-9',
+    courseId: 'cs201',
+    courseCode: 'CS201',
+    title: 'Tutorial 3: Binary Search Trees',
+    date: '2026-07-29',
+    startTime: '14:00',
+    endTime: '15:30',
+    room: 'Room 301',
+    location: { lat: 3.138, lng: 101.685, address: 'Room 301, Faculty of Computer Science, UTM' },
+    type: 'tutorial',
+  },
+
+  // ─── Week 4 ──────────────────────────────────────────────
+  {
+    id: 'cs201-10',
+    courseId: 'cs201',
+    courseCode: 'CS201',
+    title: 'Lecture 4: Heaps & Priority Queues',
+    date: '2026-08-03',
+    startTime: '09:00',
+    endTime: '11:00',
+    room: 'DK3',
+    location: { lat: 3.140, lng: 101.687, address: 'DK3, Faculty of Computer Science, UTM' },
+    type: 'lecture',
+  },
+  {
+    id: 'cs201-11',
+    courseId: 'cs201',
+    courseCode: 'CS201',
+    title: 'Lab 4: Heap Implementation',
+    date: '2026-08-04',
+    startTime: '10:00',
+    endTime: '12:00',
+    room: 'Lab B',
+    location: { lat: 3.139, lng: 101.686, address: 'Lab B, Faculty of Computer Science, UTM' },
+    type: 'lab',
+  },
+  {
+    id: 'cs201-12',
+    courseId: 'cs201',
+    courseCode: 'CS201',
+    title: 'Tutorial 4: Heap Applications',
+    date: '2026-08-05',
+    startTime: '14:00',
+    endTime: '15:30',
+    room: 'Room 301',
+    location: { lat: 3.138, lng: 101.685, address: 'Room 301, Faculty of Computer Science, UTM' },
+    type: 'tutorial',
+  },
+
+  // ─── Week 5 ──────────────────────────────────────────────
+  {
+    id: 'cs201-13',
+    courseId: 'cs201',
+    courseCode: 'CS201',
+    title: 'Lecture 5: Graph Algorithms',
+    date: '2026-08-10',
+    startTime: '09:00',
+    endTime: '11:00',
+    room: 'DK3',
+    location: { lat: 3.140, lng: 101.687, address: 'DK3, Faculty of Computer Science, UTM' },
+    type: 'lecture',
+  },
+  {
+    id: 'cs201-14',
+    courseId: 'cs201',
+    courseCode: 'CS201',
+    title: 'Lab 5: BFS & DFS',
+    date: '2026-08-11',
+    startTime: '10:00',
+    endTime: '12:00',
+    room: 'Lab B',
+    location: { lat: 3.139, lng: 101.686, address: 'Lab B, Faculty of Computer Science, UTM' },
+    type: 'lab',
+  },
+  {
+    id: 'cs201-15',
+    courseId: 'cs201',
+    courseCode: 'CS201',
+    title: 'Tutorial 5: Shortest Path',
+    date: '2026-08-12',
+    startTime: '14:00',
+    endTime: '15:30',
+    room: 'Room 301',
+    location: { lat: 3.138, lng: 101.685, address: 'Room 301, Faculty of Computer Science, UTM' },
+    type: 'tutorial',
+  },
+
+  // ─── Week 6 ──────────────────────────────────────────────
+  {
+    id: 'cs201-16',
+    courseId: 'cs201',
+    courseCode: 'CS201',
+    title: 'Lecture 6: Sorting Algorithms',
+    date: '2026-08-17',
+    startTime: '09:00',
+    endTime: '11:00',
+    room: 'DK3',
+    location: { lat: 3.140, lng: 101.687, address: 'DK3, Faculty of Computer Science, UTM' },
+    type: 'lecture',
+  },
+  {
+    id: 'cs201-17',
+    courseId: 'cs201',
+    courseCode: 'CS201',
+    title: 'Lab 6: Sort Implementation',
+    date: '2026-08-18',
+    startTime: '10:00',
+    endTime: '12:00',
+    room: 'Lab B',
+    location: { lat: 3.139, lng: 101.686, address: 'Lab B, Faculty of Computer Science, UTM' },
+    type: 'lab',
+  },
+  {
+    id: 'cs201-18',
+    courseId: 'cs201',
+    courseCode: 'CS201',
+    title: 'Tutorial 6: Algorithm Design',
+    date: '2026-08-19',
+    startTime: '14:00',
+    endTime: '15:30',
+    room: 'Room 301',
+    location: { lat: 3.138, lng: 101.685, address: 'Room 301, Faculty of Computer Science, UTM' },
+    type: 'tutorial',
+  },
+
+  // ─── Week 7 ──────────────────────────────────────────────
+  {
+    id: 'cs201-19',
+    courseId: 'cs201',
+    courseCode: 'CS201',
+    title: 'Lecture 7: Hash Tables',
+    date: '2026-08-24',
+    startTime: '09:00',
+    endTime: '11:00',
+    room: 'DK3',
+    location: { lat: 3.140, lng: 101.687, address: 'DK3, Faculty of Computer Science, UTM' },
+    type: 'lecture',
+  },
+  {
+    id: 'cs201-20',
+    courseId: 'cs201',
+    courseCode: 'CS201',
+    title: 'Lab 7: Hash Map',
+    date: '2026-08-25',
+    startTime: '10:00',
+    endTime: '12:00',
+    room: 'Lab B',
+    location: { lat: 3.139, lng: 101.686, address: 'Lab B, Faculty of Computer Science, UTM' },
+    type: 'lab',
+  },
+  {
+    id: 'cs201-21',
+    courseId: 'cs201',
+    courseCode: 'CS201',
+    title: 'Tutorial 7: Hashing Applications',
+    date: '2026-08-26',
+    startTime: '14:00',
+    endTime: '15:30',
+    room: 'Room 301',
+    location: { lat: 3.138, lng: 101.685, address: 'Room 301, Faculty of Computer Science, UTM' },
+    type: 'tutorial',
   },
 ];
 
-// Mock attendance records (student-specific)
+// ─── ATTENDANCE RECORDS (student‑specific) ──────────────────────
+
 export const ATTENDANCE_RECORDS: Record<string, 'present' | 'absent'> = {
+  // Mark some classes as present to simulate past attendance
   'cs201-1': 'present',
-  'cs301-1': 'absent',
-  'cs401-1': 'present',
+  'cs201-2': 'present',
+  'cs201-3': 'absent',
+  'cs201-4': 'present',
+  'cs201-5': 'absent',
+  'cs201-6': 'present',
+  // The rest default to absent (no entry) – but we can add a few more
+  'cs201-7': 'absent',
+  'cs201-8': 'present',
+  // You can add more entries as needed
 };
+
+// (Optional) Student list for reference – not used in this component, but kept if needed
+export const STUDENT_LIST = [
+  { id: 's1', name: 'Ahmad Fariz' },
+  { id: 's2', name: 'Nurul Ain Farhana' },
+  { id: 's3', name: 'Danial Haziq' },
+  { id: 's4', name: 'Farah Syahirah' },
+  { id: 's5', name: 'Hazwan Zulkifli' },
+  { id: 's6', name: 'Lim Wei Xian' },
+  { id: 's7', name: 'Nurul Izzah' },
+  { id: 's8', name: 'Muhammad Firdaus' },
+];

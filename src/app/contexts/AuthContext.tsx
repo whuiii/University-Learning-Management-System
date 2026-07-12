@@ -10,14 +10,22 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Map role to a mock user name
+const roleToName: Record<Role, string> = {
+  student: 'Ahmad Fariz',
+  lecturer: 'Dr. Sarah Chen',
+  admin: 'Siti Rahimah',
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<string | null>('Ahmad Fariz');
   const [role, setRole] = useState<Role | null>('student');
 
   const login = (r: Role) => {
     setRole(r);
-    setUser('User');
+    setUser(roleToName[r]);
   };
+
   const logout = () => {
     setUser(null);
     setRole(null);
