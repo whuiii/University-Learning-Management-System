@@ -9,7 +9,7 @@ export function GradesView() {
   const chartData = COURSES.map((c) => ({ name: c.code, grade: c.gradeValue, color: c.color }));
 
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className="max-w-7xl mx-auto space-y-6">
       <div>
         <h2 className="text-2xl font-normal text-foreground" style={{ fontFamily: serif }}>
           Academic Grades

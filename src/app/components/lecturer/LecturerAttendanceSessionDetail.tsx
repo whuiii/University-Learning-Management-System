@@ -272,7 +272,7 @@ export function LecturerAttendanceSessionDetail() {
   );
 
   return (
-    <div className="max-w-full mx-auto space-y-6">
+    <div  className="max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <Button variant="ghost" onClick={() => navigate('/lecturer/attendance')} className="mb-2 -ml-2">

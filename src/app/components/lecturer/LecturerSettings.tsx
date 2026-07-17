@@ -29,7 +29,7 @@ export function LecturerSettings() {
   // ─── Profile ──────────────────────────────────────────────
   const [profile, setProfile] = useState({
     name: user || 'Dr. Sarah Chen',
-    email: 'sarah.chen@utn.edu.my',
+    email: 'sarah.chen@utp.edu.my',
     staffId: 'LEC20241001',
     department: 'Computer Science',
     title: 'Senior Lecturer',

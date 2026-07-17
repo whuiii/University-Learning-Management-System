@@ -47,7 +47,7 @@ export function CourseDetailView() {
   const courseAssignments = ASSIGNMENTS.filter((a) => a.courseId === course.id);
 
   return (
-    <div className="max-w-4xl space-y-6">
+    <div className="max-w-7xl mx-auto space-y-6">
       {/* Hero */}
       <div className="rounded-2xl overflow-hidden border border-border">
         <div className="h-44 relative" style={{ background: `${course.color}20` }}>

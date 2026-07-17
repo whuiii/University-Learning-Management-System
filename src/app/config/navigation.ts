@@ -43,9 +43,6 @@ export const roleNavConfig: Record<Role, NavItem[]> = {
     
     // Assessment
     { id: 'grade-submissions', label: 'Grade Submissions', icon: FileCheck, path: '/lecturer/grading', section: 'Assessment' },
-    // Communication
-    { id: 'discussions', label: 'Discussions', icon: MessageCircle, path: '/discussions', section: 'Communication' },
-    // Analytics
     { id: 'performance', label: 'Student Performance', icon: TrendingUp, path: '/lecturer/performance', section: 'Analytics' },
     { id: 'attendance-reports', label: 'Attendance', icon: Clock, path: '/lecturer/attendance', section: 'Analytics' },
     // Settings

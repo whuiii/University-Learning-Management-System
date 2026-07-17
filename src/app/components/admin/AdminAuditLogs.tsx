@@ -15,10 +15,10 @@ import { Search, Download, Filter } from 'lucide-react';
 import { serif } from '../../utils/helpers';
 
 const mockLogs = [
-  { id: 1, user: 'admin@utn.edu.my', action: 'User Login', resource: 'User: ahmed', timestamp: '2025-07-13 09:15 AM', status: 'success' },
-  { id: 2, user: 'sarah.chen@utn.edu.my', action: 'Grade Update', resource: 'CS201 Assignment 1', timestamp: '2025-07-13 08:45 AM', status: 'success' },
-  { id: 3, user: 'user@utn.edu.my', action: 'Password Reset', resource: 'User: alice', timestamp: '2025-07-13 08:20 AM', status: 'failure' },
-  { id: 4, user: 'admin@utn.edu.my', action: 'Role Update', resource: 'Role: Lecturer', timestamp: '2025-07-12 05:30 PM', status: 'success' },
+  { id: 1, user: 'admin@utp.edu.my', action: 'User Login', resource: 'User: ahmed', timestamp: '2025-07-13 09:15 AM', status: 'success' },
+  { id: 2, user: 'sarah.chen@utp.edu.my', action: 'Grade Update', resource: 'CS201 Assignment 1', timestamp: '2025-07-13 08:45 AM', status: 'success' },
+  { id: 3, user: 'user@utp.edu.my', action: 'Password Reset', resource: 'User: alice', timestamp: '2025-07-13 08:20 AM', status: 'failure' },
+  { id: 4, user: 'admin@utp.edu.my', action: 'Role Update', resource: 'Role: Lecturer', timestamp: '2025-07-12 05:30 PM', status: 'success' },
 ];
 
 export function AdminAuditLogs() {

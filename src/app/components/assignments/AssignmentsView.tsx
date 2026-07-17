@@ -7,7 +7,7 @@ export function AssignmentsView() {
   const filtered = filter === 'all' ? ASSIGNMENTS : ASSIGNMENTS.filter((a) => a.status === filter);
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="max-w-7xl mx-auto space-y-6">
       <div>
         <h2 className="text-2xl font-normal text-foreground" style={{ fontFamily: serif }}>
           Assignments

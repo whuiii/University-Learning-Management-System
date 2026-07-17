@@ -47,7 +47,7 @@ export function LecturerAttendanceSessions() {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div  className="max-w-7xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-normal text-foreground" style={{ fontFamily: serif }}>
           Attendance Management

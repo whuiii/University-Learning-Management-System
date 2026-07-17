@@ -24,12 +24,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 // ─── Mock students ───────────────────────────────────────────
 function getMockStudents(courseId: string) {
   const students = [
-    { id: 's1', name: 'Ahmad Fariz', email: 'ahmad.fariz@utn.edu.my', grade: 'A-', progress: 85 },
-    { id: 's2', name: 'Nurul Ain Farhana', email: 'nurul.ain@utn.edu.my', grade: 'B+', progress: 72 },
-    { id: 's3', name: 'Danial Haziq', email: 'danial.haziq@utn.edu.my', grade: 'C+', progress: 60 },
-    { id: 's4', name: 'Farah Syahirah', email: 'farah.syahirah@utn.edu.my', grade: 'A', progress: 92 },
-    { id: 's5', name: 'Hazwan Zulkifli', email: 'hazwan.zulkifli@utn.edu.my', grade: 'B', progress: 78 },
-    { id: 's6', name: 'Lim Wei Xian', email: 'lim.weixian@utn.edu.my', grade: 'A-', progress: 88 },
+    { id: 's1', name: 'Ahmad Fariz', email: 'ahmad.fariz@utp.edu.my', grade: 'A-', progress: 85 },
+    { id: 's2', name: 'Nurul Ain Farhana', email: 'nurul.ain@utp.edu.my', grade: 'B+', progress: 72 },
+    { id: 's3', name: 'Danial Haziq', email: 'danial.haziq@utp.edu.my', grade: 'C+', progress: 60 },
+    { id: 's4', name: 'Farah Syahirah', email: 'farah.syahirah@utp.edu.my', grade: 'A', progress: 92 },
+    { id: 's5', name: 'Hazwan Zulkifli', email: 'hazwan.zulkifli@utp.edu.my', grade: 'B', progress: 78 },
+    { id: 's6', name: 'Lim Wei Xian', email: 'lim.weixian@utp.edu.my', grade: 'A-', progress: 88 },
   ];
   const seed = courseId.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
   const shuffled = [...students];

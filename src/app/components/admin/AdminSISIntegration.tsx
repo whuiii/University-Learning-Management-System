@@ -11,7 +11,7 @@ import { serif } from '../../utils/helpers';
 export function AdminSISIntegration() {
   const [config, setConfig] = useState({
     enabled: true,
-    apiUrl: 'https://sis.utn.edu.my/api',
+    apiUrl: 'https://sis.utp.edu.my/api',
     syncFrequency: 'daily',
     lastSync: '2025-07-12 08:30 AM',
     syncStatus: 'success',

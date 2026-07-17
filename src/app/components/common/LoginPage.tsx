@@ -20,9 +20,9 @@ export function LoginPage(){
   ];
 
   const credentials: Record<Role, string> = {
-    student: "ahmad.fariz@utn.edu.my",
-    lecturer: "sarah.chen@utn.edu.my",
-    admin: "siti.rahimah@utn.edu.my",
+    student: "ahmad.fariz@utp.edu.my",
+    lecturer: "sarah.chen@utp.edu.my",
+    admin: "siti.rahimah@utp.edu.my",
   };
 
   const handleLogin = () => {
@@ -47,8 +47,8 @@ export function LoginPage(){
             <GraduationCap size={18} style={{ color: "var(--primary-foreground)" }} />
           </div>
           <div>
-            <p className="font-bold text-foreground text-sm leading-none" style={{ fontFamily: serif }}>UTN</p>
-            <p className="text-[10px] text-muted-foreground tracking-wider mt-0.5">Universiti Teknologi Nusantara</p>
+            <p className="font-bold text-foreground text-sm leading-none" style={{ fontFamily: serif }}>UTP</p>
+            <p className="text-[10px] text-muted-foreground tracking-wider mt-0.5">Universiti Teknologi PETRONAS</p>
           </div>
         </div>
 
@@ -62,7 +62,7 @@ export function LoginPage(){
             here.
           </h1>
           <p className="text-muted-foreground leading-relaxed max-w-sm mb-10 text-sm">
-            A centralized platform for UTN's 8,400 students and 320 lecturers — courses, assessments, grades, and communication all in one place.
+            A centralized platform for UTP's 8,400 students and 320 lecturers — courses, assessments, grades, and communication all in one place.
           </p>
           <div className="grid grid-cols-3 gap-6">
             {[["200+", "Active Courses"], ["8,400", "Students"], ["142%", "ROI (3-year)"]].map(([n, l]) => (
@@ -94,7 +94,7 @@ export function LoginPage(){
               <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
                 <GraduationCap size={15} style={{ color: "var(--primary-foreground)" }} />
               </div>
-              <span className="font-semibold text-foreground text-sm" style={{ fontFamily: serif }}>UTN Learning Portal</span>
+              <span className="font-semibold text-foreground text-sm" style={{ fontFamily: serif }}>UTP Learning Portal</span>
             </div>
 
             <h2 className="text-3xl font-normal text-foreground mb-1" style={{ fontFamily: serif }}>Welcome back</h2>
@@ -154,7 +154,7 @@ export function LoginPage(){
 
             <p className="text-center text-xs text-muted-foreground mt-5">
               Need help?{" "}
-              <span className="text-primary cursor-pointer hover:underline">it-support@utn.edu.my</span>
+              <span className="text-primary cursor-pointer hover:underline">it-support@utp.edu.my</span>
             </p>
           </div>
         </div>

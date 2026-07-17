@@ -52,14 +52,14 @@ interface StudentPerformance {
 
 // ─── Helpers ──────────────────────────────────────────────────
 const studentList = [
-  { id: 's1', name: 'Ahmad Fariz', email: 'ahmad.fariz@utn.edu.my' },
-  { id: 's2', name: 'Nurul Ain Farhana', email: 'nurul.ain@utn.edu.my' },
-  { id: 's3', name: 'Danial Haziq', email: 'danial.haziq@utn.edu.my' },
-  { id: 's4', name: 'Farah Syahirah', email: 'farah.syahirah@utn.edu.my' },
-  { id: 's5', name: 'Hazwan Zulkifli', email: 'hazwan.zulkifli@utn.edu.my' },
-  { id: 's6', name: 'Lim Wei Xian', email: 'lim.weixian@utn.edu.my' },
-  { id: 's7', name: 'Nurul Izzah', email: 'nurul.izzah@utn.edu.my' },
-  { id: 's8', name: 'Muhammad Firdaus', email: 'muhammad.firdaus@utn.edu.my' },
+  { id: 's1', name: 'Ahmad Fariz', email: 'ahmad.fariz@utp.edu.my' },
+  { id: 's2', name: 'Nurul Ain Farhana', email: 'nurul.ain@utp.edu.my' },
+  { id: 's3', name: 'Danial Haziq', email: 'danial.haziq@utp.edu.my' },
+  { id: 's4', name: 'Farah Syahirah', email: 'farah.syahirah@utp.edu.my' },
+  { id: 's5', name: 'Hazwan Zulkifli', email: 'hazwan.zulkifli@utp.edu.my' },
+  { id: 's6', name: 'Lim Wei Xian', email: 'lim.weixian@utp.edu.my' },
+  { id: 's7', name: 'Nurul Izzah', email: 'nurul.izzah@utp.edu.my' },
+  { id: 's8', name: 'Muhammad Firdaus', email: 'muhammad.firdaus@utp.edu.my' },
 ];
 
 function generatePerformanceData(courseId: string): StudentPerformance[] {

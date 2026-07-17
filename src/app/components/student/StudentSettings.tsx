@@ -25,7 +25,7 @@ export function StudentSettings() {
   // Profile state (mock)
   const [profile, setProfile] = useState({
     name: user || 'Ahmad Fariz',
-    email: 'ahmad.fariz@utn.edu.my',
+    email: 'ahmad.fariz@utp.edu.my',
     studentId: 'STU20241234',
     program: 'Computer Science (3rd Year)',
   });

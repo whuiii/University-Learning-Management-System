@@ -19,6 +19,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { ASSIGNMENTS } from '../../data';
 import { serif } from '../../utils/helpers';
 
+
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 const localizer = momentLocalizer(moment);
@@ -216,6 +217,33 @@ export function StudentCalendar() {
     openEditModal(event);
   };
 
+  // ─── Today's Date Highlighting ────────────────────────────
+  const dayPropGetter = (date: Date) => {
+    const today = new Date();
+    if (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    ) {
+      return {
+        style: {
+          backgroundColor: '#3b82f6', // primary blue
+          color: 'white',
+          borderRadius: '50%',
+          fontWeight: 'bold',
+          width: '2.5rem',
+          height: '2.5rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: '0 auto',
+        },
+        className: 'rbc-today-highlight', // optional for custom CSS
+      };
+    }
+    return {};
+  };
+
   const { views } = useMemo(() => ({
     views: {
       month: true,
@@ -252,6 +280,7 @@ export function StudentCalendar() {
           onSelectSlot={handleSelectSlot}
           onSelectEvent={handleSelectEvent}
           eventPropGetter={getEventStyle}
+          dayPropGetter={dayPropGetter} // 👈 highlights today's date
           selectable
           popup
           tooltipAccessor={(event) =>
