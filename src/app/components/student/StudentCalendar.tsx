@@ -16,10 +16,10 @@ import { Label } from '../../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 import { Textarea } from '../../components/ui/textarea';
 import { Plus, Trash2 } from 'lucide-react';
-import { ASSIGNMENTS } from '../../data';
+import { COURSES, ASSIGNMENTS } from '../../data';
 import { serif } from '../../utils/helpers';
 
-
+// CSS import – TypeScript may complain; we'll add a declaration below
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 const localizer = momentLocalizer(moment);
@@ -85,14 +85,19 @@ export function StudentCalendar() {
       const customEvents = stored ? JSON.parse(stored) : [];
 
       // Convert assignment deadlines to calendar events
-      const assignmentEvents: CalendarEvent[] = ASSIGNMENTS.map((a) => ({
-        id: `assignment-${a.id}`,
-        title: `${a.courseCode}: ${a.title}`,
-        start: new Date(a.dueDate),
-        end: new Date(a.dueDate),
-        type: 'assignment',
-        description: `Weight: ${a.weight}% · Status: ${a.status}`,
-      }));
+      const assignmentEvents: CalendarEvent[] = ASSIGNMENTS.map((a) => {
+        // Find the course to get its code
+        const course = COURSES.find((c) => c.id === a.courseId);
+        const courseCode = course?.code || a.courseId; // fallback to ID if not found
+        return {
+          id: `assignment-${a.id}`,
+          title: `${courseCode}: ${a.title}`,
+          start: new Date(a.dueDate),
+          end: new Date(a.dueDate),
+          type: 'assignment',
+          description: `Weight: ${a.weight}% · Status: ${a.status}`,
+        };
+      });
 
       // Merge and sort by start date
       const allEvents = [...assignmentEvents, ...customEvents].sort(
@@ -238,7 +243,7 @@ export function StudentCalendar() {
           justifyContent: 'center',
           margin: '0 auto',
         },
-        className: 'rbc-today-highlight', // optional for custom CSS
+        className: 'rbc-today-highlight',
       };
     }
     return {};
@@ -280,7 +285,7 @@ export function StudentCalendar() {
           onSelectSlot={handleSelectSlot}
           onSelectEvent={handleSelectEvent}
           eventPropGetter={getEventStyle}
-          dayPropGetter={dayPropGetter} // 👈 highlights today's date
+          dayPropGetter={dayPropGetter}
           selectable
           popup
           tooltipAccessor={(event) =>

@@ -6,3 +6,5 @@ export { LecturerAttendanceSessions } from "./LecturerAttendanceSessions";
 export { LecturerAttendanceSessionDetail } from "./LecturerAttendanceSessionDetail";
 export { LecturerAttendanceMatrix } from "./LecturerAttendanceMatrix";
 export { LecturerStudentPerformance } from "./LecturerStudentPerformance"; 
+export { LecturerUploadMaterial } from "./LecturerUploadMaterial";
+export { LecturerGrading } from './LecturerGrading';

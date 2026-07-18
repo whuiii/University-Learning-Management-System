@@ -11,7 +11,6 @@ export function LecturerCourses() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // Filter courses taught by this lecturer
   const lecturerName = user || 'Dr. Sarah Chen';
   const myCourses = COURSES.filter((c) => c.lecturer === lecturerName);
 
@@ -33,7 +32,7 @@ export function LecturerCourses() {
         </p>
       </div>
 
-      {/* Filters (optional – keep for consistency) */}
+      {/* Filters */}
       <div className="flex gap-2 flex-wrap">
         {['all', 'in-progress', 'completed'].map((f) => (
           <button

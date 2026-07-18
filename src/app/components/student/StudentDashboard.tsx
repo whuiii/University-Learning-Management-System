@@ -312,8 +312,9 @@ export function StudentDashboard() {
                       <p className="text-xs font-semibold text-foreground leading-snug mb-1">
                         {a.title}
                       </p>
+                      {/* ✅ FIX: use course?.code instead of a.courseCode */}
                       <p className="text-[10px] text-muted-foreground">
-                        {a.courseCode} · {a.type}
+                        {course?.code || a.courseId} · {a.type}
                       </p>
                     </div>
                     <span

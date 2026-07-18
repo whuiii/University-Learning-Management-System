@@ -19,24 +19,47 @@ export interface Course {
   completedModules: number;
   nextClass: string;
   description: string;
+  credits?: number;
+  learningOutcomes?: string[]; // added for lecturer editing
+}
+
+export interface Material {
+  id: string;
+  type: 'pdf' | 'video' | 'link';
+  title: string;
+  date: string;
+  size?: string;
+  duration?: string;
+  url?: string;
 }
 
 export interface Assignment {
   id: string;
   courseId: string;
-  courseCode: string;
   title: string;
   dueDate: string;
-  status: "pending" | "submitted" | "graded";
   weight: number;
   type: string;
+  status: 'pending' | 'submitted' | 'graded';
   score?: number;
+}
+
+export interface Quiz {
+  id: string;
+  courseId: string;
+  title: string;
+  dueDate: string;
+  duration: number;
+  totalQuestions: number;
+  status: 'upcoming' | 'available' | 'completed' | 'graded';
+  score: number | null;
+  attempts: number;
+  maxAttempts: number;
 }
 
 export interface Announcement {
   id: string;
   courseId: string;
-  courseCode: string;
   title: string;
   body: string;
   author: string;
@@ -44,19 +67,30 @@ export interface Announcement {
   pinned: boolean;
 }
 
-export interface GradeHistoryEntry {
-  week: string;
-  cs201: number;
-  cs301: number;
-  cs302: number;
-  cs401: number;
+export interface Student {
+  id: string;
+  name: string;
+  email: string;
 }
 
-export interface Material {
+export interface FullCourse extends Course {
+  materials: Material[];
+  assignments: Assignment[];
+  quizzes: Quiz[];
+  announcements: Announcement[];
+  students: Student[];
+  grades: Record<string, Record<string, number>>; // studentId -> assignmentId -> score
+}
+
+// ─── Grading ──────────────────────────────────────────────────
+
+export interface Assessment {
   id: string;
-  type: "pdf" | "video";
-  title: string;
-  date: string;
-  size?: string;
-  duration?: string;
+  type: string;          // e.g., "Quiz 1", "Test 2"
+  maxScore: number;
+}
+
+export interface GradingData {
+  assessments: Assessment[];
+  scores: Record<string, Record<string, number | null>>; // studentId -> assessmentId -> score (null = not started)
 }

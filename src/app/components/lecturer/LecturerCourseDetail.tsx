@@ -1,17 +1,38 @@
-import { useState, useMemo, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+// pages/lecturer/LecturerCourseDetail.tsx
+
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
-  Users, BookOpen, FileText, Video, ClipboardList,
-  BarChart, Bell, Plus, Search, Download, ChevronRight,
-  Clock, CheckCircle2, MessageCircle, Send, ThumbsUp,
-  Calendar, Trash2, Edit, Pin, Upload, Link,
+  Users,
+  BookOpen,
+  FileText,
+  Video,
+  ClipboardList,
+  BarChart,
+  Bell,
+  Plus,
+  Search,
+  Download,
+  ChevronRight,
+  Clock,
+  CheckCircle2,
+  MessageCircle,
+  Send,
+  ThumbsUp,
+  Calendar,
+  Trash2,
+  Edit,
+  Pin,
+  Upload,
+  Link,
+  X,
 } from 'lucide-react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
-import { COURSES, ASSIGNMENTS, MATERIALS, GRADE_HISTORY, QUIZZES } from '../../data';
+import { GRADE_HISTORY } from '../../data';
 import { useAuth } from '../../contexts/AuthContext';
 import { serif, mono, statusBg, statusColor, statusLabel } from '../../utils/helpers';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
+import { Card, CardContent } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Input } from '../../components/ui/input';
@@ -20,110 +41,92 @@ import { Label } from '../../components/ui/label';
 import { Separator } from '../../components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
+import { useCourseData } from '../hooks/useCourseData';
 
-// ─── Mock students ───────────────────────────────────────────
-function getMockStudents(courseId: string) {
-  const students = [
-    { id: 's1', name: 'Ahmad Fariz', email: 'ahmad.fariz@utp.edu.my', grade: 'A-', progress: 85 },
-    { id: 's2', name: 'Nurul Ain Farhana', email: 'nurul.ain@utp.edu.my', grade: 'B+', progress: 72 },
-    { id: 's3', name: 'Danial Haziq', email: 'danial.haziq@utp.edu.my', grade: 'C+', progress: 60 },
-    { id: 's4', name: 'Farah Syahirah', email: 'farah.syahirah@utp.edu.my', grade: 'A', progress: 92 },
-    { id: 's5', name: 'Hazwan Zulkifli', email: 'hazwan.zulkifli@utp.edu.my', grade: 'B', progress: 78 },
-    { id: 's6', name: 'Lim Wei Xian', email: 'lim.weixian@utp.edu.my', grade: 'A-', progress: 88 },
-  ];
-  const seed = courseId.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
-  const shuffled = [...students];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = (seed + i) % (i + 1);
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled.slice(0, Math.min(5 + seed % 3, shuffled.length));
-}
-
-// ─── Types ────────────────────────────────────────────────────
-interface Announcement {
-  id: string;
-  title: string;
-  body: string;
-  date: string;
-  pinned: boolean;
-  author: string;
-}
-
-interface QuizForm {
-  title: string;
-  dueDate: string;
-  duration: number;
-  totalQuestions: number;
-  status: 'upcoming' | 'available' | 'completed' | 'graded';
-}
-
-// ─── Component ──────────────────────────────────────────────
 export function LecturerCourseDetail() {
   const { courseId } = useParams<{ courseId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
 
-  const course = COURSES.find((c) => c.id === courseId);
-  if (!course) {
-    navigate('/lecturer/courses', { replace: true });
-    return null;
-  }
+  const {
+    courseData,
+    loading,
+    addMaterial,
+    deleteMaterial,
+    addAssignment,
+    deleteAssignment,
+    addQuiz,
+    deleteQuiz,
+    addAnnouncement,
+    deleteAnnouncement,
+    updateOverview,
+    updateGrade,
+  } = useCourseData(courseId!);
 
-  // ─── States ──────────────────────────────────────────────
+  // ─── State for tab and modals ────────────────────────────
   const [tab, setTab] = useState('overview');
   const [searchTerm, setSearchTerm] = useState('');
-  const [editingGrades, setEditingGrades] = useState<Record<string, string>>({});
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+
+  // Overview edit
+  const [isEditingOverview, setIsEditingOverview] = useState(false);
+  const [editDescription, setEditDescription] = useState('');
+  const [editOutcomes, setEditOutcomes] = useState<string[]>([]);
+
+  // Announcement modal
   const [showAnnounceModal, setShowAnnounceModal] = useState(false);
   const [newAnnouncement, setNewAnnouncement] = useState({ title: '', body: '', pinned: false });
+
+  // Material modal
+  const [showMaterialModal, setShowMaterialModal] = useState(false);
+  const [newMaterial, setNewMaterial] = useState({ title: '', type: 'pdf' as 'pdf' | 'video' | 'link', url: '' });
+
+  // Assignment modal
+  const [showAssignmentModal, setShowAssignmentModal] = useState(false);
+  const [newAssignment, setNewAssignment] = useState({ title: '', dueDate: '', weight: 10, type: '' });
+
+  // Quiz modal – includes maxAttempts now
   const [showQuizModal, setShowQuizModal] = useState(false);
-  const [newQuiz, setNewQuiz] = useState<QuizForm>({
+  const [newQuiz, setNewQuiz] = useState({
     title: '',
     dueDate: '',
     duration: 30,
     totalQuestions: 10,
-    status: 'upcoming',
+    status: 'upcoming' as 'upcoming' | 'available' | 'completed' | 'graded',
+    maxAttempts: 1, // 👈 FIXED: added here
   });
 
-  const students = useMemo(() => getMockStudents(courseId!), [courseId]);
-  const courseAssignments = ASSIGNMENTS.filter((a) => a.courseId === course.id);
-  const courseQuizzes = QUIZZES.filter((q) => q.courseId === course.id);
+  // Grade editing
+  const [editingGrades, setEditingGrades] = useState<Record<string, string>>({});
 
-  // ─── Load announcements from localStorage ──────────────────
+  // ─── Check URL params to open modals ──────────────────────
   useEffect(() => {
-    const stored = localStorage.getItem(`announcements_${course.id}`);
-    if (stored) {
-      setAnnouncements(JSON.parse(stored));
-    } else {
-      // Seed with sample announcements
-      const sample: Announcement[] = [
-        {
-          id: 'ann1',
-          title: 'Welcome to the Course!',
-          body: 'Please review the syllabus and complete the pre‑course survey.',
-          date: new Date().toISOString().split('T')[0],
-          pinned: true,
-          author: user || 'Dr. Sarah Chen',
-        },
-        {
-          id: 'ann2',
-          title: 'Lab Session Rescheduled',
-          body: 'The lab session for this week is moved to Thursday 10 AM.',
-          date: new Date(Date.now() - 86400000).toISOString().split('T')[0],
-          pinned: false,
-          author: user || 'Dr. Sarah Chen',
-        },
-      ];
-      setAnnouncements(sample);
-      localStorage.setItem(`announcements_${course.id}`, JSON.stringify(sample));
+    const openModal = searchParams.get('openModal');
+    const tabParam = searchParams.get('tab');
+    if (tabParam) setTab(tabParam);
+    if (openModal === 'true') {
+      if (tabParam === 'announcements') setShowAnnounceModal(true);
+      else if (tabParam === 'materials') setShowMaterialModal(true);
+      else if (tabParam === 'assignments') setShowAssignmentModal(true);
+      else if (tabParam === 'quizzes') setShowQuizModal(true);
     }
-  }, [course.id, user]);
+  }, [searchParams]);
 
-  const saveAnnouncements = (data: Announcement[]) => {
-    localStorage.setItem(`announcements_${course.id}`, JSON.stringify(data));
-    setAnnouncements(data);
-  };
+  // ─── Sync edit fields with course data ────────────────────
+  useEffect(() => {
+    if (courseData) {
+      setEditDescription(courseData.description || '');
+      setEditOutcomes(courseData.learningOutcomes || []);
+    }
+  }, [courseData]);
+
+  if (loading) return <div className="p-10 text-center">Loading course...</div>;
+  if (!courseData) {
+    navigate('/lecturer/courses', { replace: true });
+    return null;
+  }
+
+  const course = courseData;
 
   // ─── Handlers ──────────────────────────────────────────────
   const handlePostAnnouncement = () => {
@@ -131,25 +134,32 @@ export function LecturerCourseDetail() {
       toast.error('Please fill in both title and body');
       return;
     }
-    const newItem: Announcement = {
-      id: `ann-${Date.now()}`,
-      title: newAnnouncement.title,
-      body: newAnnouncement.body,
-      date: new Date().toISOString().split('T')[0],
-      pinned: newAnnouncement.pinned,
-      author: user || 'Dr. Sarah Chen',
-    };
-    const updated = [newItem, ...announcements];
-    saveAnnouncements(updated);
+    addAnnouncement({ ...newAnnouncement, courseId: course.id });
     toast.success('Announcement posted!');
     setShowAnnounceModal(false);
     setNewAnnouncement({ title: '', body: '', pinned: false });
   };
 
-  const handleDeleteAnnouncement = (id: string) => {
-    const updated = announcements.filter((a) => a.id !== id);
-    saveAnnouncements(updated);
-    toast.success('Announcement deleted');
+  const handleUploadMaterial = () => {
+    if (!newMaterial.title.trim()) {
+      toast.error('Please enter a title');
+      return;
+    }
+    addMaterial(newMaterial);
+    toast.success('Material uploaded!');
+    setShowMaterialModal(false);
+    setNewMaterial({ title: '', type: 'pdf', url: '' });
+  };
+
+  const handleCreateAssignment = () => {
+    if (!newAssignment.title.trim() || !newAssignment.dueDate || !newAssignment.type) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+    addAssignment({ ...newAssignment, courseId: course.id });
+    toast.success('Assignment created!');
+    setShowAssignmentModal(false);
+    setNewAssignment({ title: '', dueDate: '', weight: 10, type: '' });
   };
 
   const handleCreateQuiz = () => {
@@ -157,13 +167,38 @@ export function LecturerCourseDetail() {
       toast.error('Please fill in all required fields');
       return;
     }
-    // In a real app, you'd POST to the server and refresh the list
-    toast.success(`Quiz "${newQuiz.title}" created!`);
+    addQuiz({ ...newQuiz, courseId: course.id });
+    toast.success('Quiz created!');
     setShowQuizModal(false);
-    setNewQuiz({ title: '', dueDate: '', duration: 30, totalQuestions: 10, status: 'upcoming' });
+    setNewQuiz({
+      title: '',
+      dueDate: '',
+      duration: 30,
+      totalQuestions: 10,
+      status: 'upcoming',
+      maxAttempts: 1,
+    });
   };
 
-  // ─── Tabs ──────────────────────────────────────────────────
+  const handleSaveOverview = () => {
+    updateOverview(editDescription, editOutcomes);
+    setIsEditingOverview(false);
+    toast.success('Overview updated');
+  };
+
+  const handleSaveGrades = () => {
+    Object.entries(editingGrades).forEach(([key, value]) => {
+      const [studentId, assignmentId] = key.split('-');
+      const score = parseFloat(value);
+      if (!isNaN(score)) {
+        updateGrade(studentId, assignmentId, score);
+      }
+    });
+    toast.success('Grades saved');
+    setEditingGrades({});
+  };
+
+  // ─── Tabs definition ──────────────────────────────────────
   const tabs = [
     { id: 'overview', label: 'Overview' },
     { id: 'announcements', label: 'Announcements' },
@@ -175,7 +210,6 @@ export function LecturerCourseDetail() {
     { id: 'discussion', label: 'Discussion' },
   ];
 
-  // ─── Render ──────────────────────────────────────────────
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Hero */}
@@ -199,10 +233,20 @@ export function LecturerCourseDetail() {
               </p>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => setTab('announcements')}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setTab('announcements');
+                  setShowAnnounceModal(true);
+                }}
+              >
                 <Bell size={14} className="mr-2" /> Announce
               </Button>
-              <Button size="sm" onClick={() => setTab('materials')}>
+              <Button
+                size="sm"
+                onClick={() => navigate(`/lecturer/courses/${courseId}/materials/upload`)}
+              >
                 <Upload size={14} className="mr-2" /> Upload
               </Button>
             </div>
@@ -225,29 +269,79 @@ export function LecturerCourseDetail() {
         ))}
       </div>
 
-      {/* ─── Overview Tab ──────────────────────────────────── */}
+      {/* ─── Tab Content ────────────────────────────────────── */}
+
+      {/* Overview Tab */}
       {tab === 'overview' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-6">
-            <h3 className="font-normal text-foreground mb-3" style={{ fontFamily: serif, fontSize: '1.1rem' }}>
-              About this Course
-            </h3>
-            <p className="text-sm text-muted-foreground leading-relaxed mb-5">{course.description}</p>
-            <h4 className="font-semibold text-sm text-foreground mb-3">Learning Outcomes</h4>
-            <ul className="space-y-2.5">
-              {[
-                'Analyse algorithm time and space complexity using Big-O notation',
-                'Implement core data structures including trees, heaps, and hash tables',
-                'Apply appropriate data structures to solve real engineering problems',
-                'Debug and optimise implementations for real-world performance',
-              ].map((lo) => (
-                <li key={lo} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                  <CheckCircle2 size={14} className="text-emerald-500 mt-0.5 flex-shrink-0" />
-                  {lo}
-                </li>
-              ))}
-            </ul>
+            <div className="flex justify-between items-start mb-3">
+              <h3 className="font-normal text-foreground" style={{ fontFamily: serif, fontSize: '1.1rem' }}>
+                About this Course
+              </h3>
+              <Button variant="ghost" size="sm" onClick={() => setIsEditingOverview(!isEditingOverview)}>
+                {isEditingOverview ? <X size={14} /> : <Edit size={14} />}
+              </Button>
+            </div>
+            {isEditingOverview ? (
+              <div className="space-y-4">
+                <Textarea
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  rows={3}
+                  placeholder="Course description..."
+                />
+                <div>
+                  <Label>Learning Outcomes</Label>
+                  {editOutcomes.map((outcome, idx) => (
+                    <div key={idx} className="flex items-center gap-2 mt-1">
+                      <Input
+                        value={outcome}
+                        onChange={(e) => {
+                          const newOutcomes = [...editOutcomes];
+                          newOutcomes[idx] = e.target.value;
+                          setEditOutcomes(newOutcomes);
+                        }}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const newOutcomes = editOutcomes.filter((_, i) => i !== idx);
+                          setEditOutcomes(newOutcomes);
+                        }}
+                      >
+                        <Trash2 size={14} className="text-red-500" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-2"
+                    onClick={() => setEditOutcomes([...editOutcomes, ''])}
+                  >
+                    <Plus size={14} className="mr-1" /> Add Outcome
+                  </Button>
+                </div>
+                <Button onClick={handleSaveOverview}>Save Overview</Button>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-5">{course.description}</p>
+                <h4 className="font-semibold text-sm text-foreground mb-3">Learning Outcomes</h4>
+                <ul className="space-y-2.5">
+                  {(course.learningOutcomes || []).map((lo, idx) => (
+                    <li key={idx} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                      <CheckCircle2 size={14} className="text-emerald-500 mt-0.5 flex-shrink-0" />
+                      {lo}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
           </div>
+          {/* Quick stats */}
           <div className="space-y-4">
             <div className="bg-card border border-border rounded-2xl p-5">
               <h4 className="font-normal text-foreground mb-4 text-sm" style={{ fontFamily: serif }}>
@@ -260,19 +354,21 @@ export function LecturerCourseDetail() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Assignments</span>
-                  <span className="font-semibold">{courseAssignments.length}</span>
+                  <span className="font-semibold">{course.assignments.length}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Quizzes</span>
-                  <span className="font-semibold">{courseQuizzes.length}</span>
+                  <span className="font-semibold">{course.quizzes.length}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Materials</span>
-                  <span className="font-semibold">{MATERIALS.length}</span>
+                  <span className="font-semibold">{course.materials.length}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Avg. Grade</span>
-                  <span className="font-semibold" style={{ color: course.color }}>{course.gradeValue}%</span>
+                  <span className="font-semibold" style={{ color: course.color }}>
+                    {course.gradeValue}%
+                  </span>
                 </div>
               </div>
               <div className="mt-4">
@@ -298,7 +394,7 @@ export function LecturerCourseDetail() {
         </div>
       )}
 
-      {/* ─── Announcements Tab ────────────────────────────── */}
+      {/* Announcements Tab */}
       {tab === 'announcements' && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
@@ -309,13 +405,13 @@ export function LecturerCourseDetail() {
               <Plus size={14} className="mr-2" /> New Announcement
             </Button>
           </div>
-          {announcements.length === 0 ? (
+          {course.announcements.length === 0 ? (
             <div className="bg-card border border-border rounded-2xl p-10 text-center text-muted-foreground">
               No announcements yet.
             </div>
           ) : (
             <div className="space-y-4">
-              {announcements.map((ann) => (
+              {course.announcements.map((ann) => (
                 <div
                   key={ann.id}
                   className={`bg-card border rounded-2xl p-5 hover:border-primary/20 transition-colors ${
@@ -325,9 +421,7 @@ export function LecturerCourseDetail() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        {ann.pinned && (
-                          <Pin size={14} className="text-primary flex-shrink-0" />
-                        )}
+                        {ann.pinned && <Pin size={14} className="text-primary flex-shrink-0" />}
                         <h4 className="font-semibold text-foreground">{ann.title}</h4>
                         <span className="text-xs text-muted-foreground ml-auto">{ann.date}</span>
                       </div>
@@ -338,7 +432,7 @@ export function LecturerCourseDetail() {
                       variant="ghost"
                       size="sm"
                       className="text-red-500 hover:text-red-600 hover:bg-red-500/10"
-                      onClick={() => handleDeleteAnnouncement(ann.id)}
+                      onClick={() => deleteAnnouncement(ann.id)}
                     >
                       <Trash2 size={14} />
                     </Button>
@@ -350,46 +444,52 @@ export function LecturerCourseDetail() {
         </div>
       )}
 
-      {/* ─── Materials Tab ──────────────────────────────────── */}
+      {/* Materials Tab */}
       {tab === 'materials' && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="font-normal text-foreground" style={{ fontFamily: serif, fontSize: '1.1rem' }}>
               Course Materials
             </h3>
-            <Button variant="outline" onClick={() => toast.info('Upload dialog would open')}>
+            <Button onClick={() => navigate(`/lecturer/courses/${courseId}/materials/upload`)}>
               <Upload size={14} className="mr-2" /> Upload Material
             </Button>
           </div>
           <div className="bg-card border border-border rounded-2xl overflow-hidden">
-            {MATERIALS.length === 0 ? (
+            {course.materials.length === 0 ? (
               <div className="p-10 text-center text-muted-foreground">No materials uploaded yet.</div>
             ) : (
-              MATERIALS.map((m, i) => (
+              course.materials.map((m, i) => (
                 <div
                   key={m.id}
                   className={`flex items-center justify-between px-5 py-4 ${
-                    i < MATERIALS.length - 1 ? 'border-b border-border' : ''
+                    i < course.materials.length - 1 ? 'border-b border-border' : ''
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     {m.type === 'pdf' ? (
                       <FileText size={16} className="text-red-500" />
-                    ) : (
+                    ) : m.type === 'video' ? (
                       <Video size={16} className="text-sky-400" />
+                    ) : (
+                      <Link size={16} className="text-blue-400" />
                     )}
                     <div>
                       <p className="font-medium text-foreground">{m.title}</p>
                       <p className="text-xs text-muted-foreground">
-                        {m.date} · {'size' in m ? m.size : m.duration}
+                        {m.date} · {m.size || m.duration || ''}
                       </p>
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button size="sm" variant="ghost">
-                      <Download size={14} />
-                    </Button>
-                    <Button size="sm" variant="ghost">
+                    {m.url && (
+                      <Button size="sm" variant="ghost" asChild>
+                        <a href={m.url} target="_blank" rel="noopener noreferrer">
+                          <Link size={14} />
+                        </a>
+                      </Button>
+                    )}
+                    <Button size="sm" variant="ghost" onClick={() => deleteMaterial(m.id)}>
                       <Trash2 size={14} className="text-red-500" />
                     </Button>
                   </div>
@@ -400,18 +500,20 @@ export function LecturerCourseDetail() {
         </div>
       )}
 
-      {/* ─── Assignments Tab ────────────────────────────────── */}
+      {/* Assignments Tab */}
       {tab === 'assignments' && (
         <div className="space-y-3">
           <div className="flex justify-end">
-            <Button size="sm"><Plus size={14} className="mr-2" /> New Assignment</Button>
+            <Button size="sm" onClick={() => setShowAssignmentModal(true)}>
+              <Plus size={14} className="mr-2" /> New Assignment
+            </Button>
           </div>
-          {courseAssignments.length === 0 ? (
+          {course.assignments.length === 0 ? (
             <div className="bg-card border border-border rounded-2xl p-10 text-center text-muted-foreground text-sm">
               No assignments yet.
             </div>
           ) : (
-            courseAssignments.map((a) => (
+            course.assignments.map((a) => (
               <div
                 key={a.id}
                 className="bg-card border border-border rounded-2xl p-5 flex items-center gap-4 hover:border-primary/20 transition-colors"
@@ -425,9 +527,11 @@ export function LecturerCourseDetail() {
                     Due {a.dueDate} · Weight: {a.weight}% · {a.type}
                   </p>
                 </div>
-                <div className="text-right flex-shrink-0">
+                <div className="text-right flex-shrink-0 flex items-center gap-2">
                   <p className={`text-xs font-bold ${statusColor(a.status)}`}>{statusLabel(a.status)}</p>
-                  <Button size="sm" variant="ghost">Grade</Button>
+                  <Button variant="ghost" size="sm" onClick={() => deleteAssignment(a.id)} className="text-red-500">
+                    <Trash2 size={14} />
+                  </Button>
                 </div>
               </div>
             ))
@@ -435,7 +539,7 @@ export function LecturerCourseDetail() {
         </div>
       )}
 
-      {/* ─── Quizzes Tab ────────────────────────────────────── */}
+      {/* Quizzes Tab */}
       {tab === 'quizzes' && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
@@ -446,25 +550,25 @@ export function LecturerCourseDetail() {
               <Plus size={14} className="mr-2" /> Create Quiz
             </Button>
           </div>
-          {courseQuizzes.length === 0 ? (
+          {course.quizzes.length === 0 ? (
             <div className="bg-card border border-border rounded-2xl p-10 text-center text-muted-foreground">
               No quizzes created yet.
             </div>
           ) : (
             <div className="space-y-3">
-              {courseQuizzes.map((q) => {
-                const statusColor = {
+              {course.quizzes.map((q) => {
+                const statusColorMap = {
                   upcoming: 'text-blue-500',
                   available: 'text-emerald-500',
                   completed: 'text-amber-500',
                   graded: 'text-sky-400',
-                }[q.status];
-                const statusLabel = {
+                };
+                const statusLabelMap = {
                   upcoming: 'Upcoming',
                   available: 'Available',
                   completed: 'Submitted',
                   graded: 'Graded',
-                }[q.status];
+                };
                 return (
                   <div
                     key={q.id}
@@ -480,17 +584,16 @@ export function LecturerCourseDetail() {
                         {q.attempts > 0 && ` · Attempts: ${q.attempts}/${q.maxAttempts}`}
                       </p>
                     </div>
-                    <div className="text-right flex-shrink-0">
-                      <p className={`text-xs font-bold ${statusColor}`}>{statusLabel}</p>
+                    <div className="text-right flex-shrink-0 flex items-center gap-2">
+                      <p className={`text-xs font-bold ${statusColorMap[q.status]}`}>{statusLabelMap[q.status]}</p>
                       {q.status === 'graded' && q.score !== null && (
                         <p className="text-2xl font-light text-foreground mt-0.5" style={{ fontFamily: serif }}>
                           {q.score}%
                         </p>
                       )}
-                      <div className="flex gap-1 mt-1 justify-end">
-                        <Button size="sm" variant="ghost">Edit</Button>
-                        <Button size="sm" variant="ghost" className="text-red-500">Delete</Button>
-                      </div>
+                      <Button variant="ghost" size="sm" onClick={() => deleteQuiz(q.id)} className="text-red-500">
+                        <Trash2 size={14} />
+                      </Button>
                     </div>
                   </div>
                 );
@@ -500,12 +603,12 @@ export function LecturerCourseDetail() {
         </div>
       )}
 
-      {/* ─── Students Tab ───────────────────────────────────── */}
+      {/* Students Tab */}
       {tab === 'students' && (
         <div className="bg-card border border-border rounded-2xl overflow-hidden">
           <div className="px-5 py-4 border-b border-border flex flex-wrap items-center justify-between gap-2">
             <h3 className="font-normal text-foreground text-sm" style={{ fontFamily: serif }}>
-              Enrolled Students ({students.length})
+              Enrolled Students ({course.students.length})
             </h3>
             <div className="flex gap-2">
               <div className="relative">
@@ -528,37 +631,30 @@ export function LecturerCourseDetail() {
                 <tr>
                   <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground">Name</th>
                   <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground">Email</th>
-                  <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground">Grade</th>
-                  <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground">Progress</th>
                   <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {students.map((s) => (
-                  <tr key={s.id} className="border-t border-border hover:bg-secondary/40 transition-colors">
-                    <td className="px-5 py-3 text-sm font-medium">{s.name}</td>
-                    <td className="px-5 py-3 text-sm text-muted-foreground">{s.email}</td>
-                    <td className="px-5 py-3 text-sm font-semibold" style={{ color: course.color }}>{s.grade}</td>
-                    <td className="px-5 py-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-20 h-1.5 bg-secondary rounded-full overflow-hidden">
-                          <div className="h-full rounded-full" style={{ width: `${s.progress}%`, background: course.color }} />
-                        </div>
-                        <span className="text-xs" style={{ fontFamily: mono }}>{s.progress}%</span>
-                      </div>
-                    </td>
-                    <td className="px-5 py-3">
-                      <Button size="sm" variant="ghost">Contact</Button>
-                    </td>
-                  </tr>
-                ))}
+                {course.students
+                  .filter((s) => s.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                  .map((s) => (
+                    <tr key={s.id} className="border-t border-border hover:bg-secondary/40 transition-colors">
+                      <td className="px-5 py-3 text-sm font-medium">{s.name}</td>
+                      <td className="px-5 py-3 text-sm text-muted-foreground">{s.email}</td>
+                      <td className="px-5 py-3">
+                        <Button size="sm" variant="ghost">
+                          Contact
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>
         </div>
       )}
 
-      {/* ─── Grades Tab ──────────────────────────────────────── */}
+      {/* Grades Tab */}
       {tab === 'grades' && (
         <div className="space-y-5">
           <div className="bg-card border border-border rounded-2xl p-5">
@@ -593,8 +689,8 @@ export function LecturerCourseDetail() {
               <h3 className="font-normal text-foreground text-sm" style={{ fontFamily: serif }}>
                 Assessment Breakdown
               </h3>
-              <Button size="sm" variant="outline">
-                <Download size={14} className="mr-2" /> Export Grades
+              <Button size="sm" variant="outline" onClick={handleSaveGrades}>
+                <Download size={14} className="mr-2" /> Save All Grades
               </Button>
             </div>
             <div className="overflow-x-auto">
@@ -602,7 +698,7 @@ export function LecturerCourseDetail() {
                 <thead className="bg-secondary/50">
                   <tr>
                     <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground">Student</th>
-                    {courseAssignments.map((a) => (
+                    {course.assignments.map((a) => (
                       <th key={a.id} className="px-3 py-3 text-center text-xs font-semibold text-muted-foreground">
                         {a.title.length > 12 ? a.title.slice(0, 10) + '…' : a.title}
                       </th>
@@ -611,123 +707,68 @@ export function LecturerCourseDetail() {
                   </tr>
                 </thead>
                 <tbody>
-                  {students.slice(0, 5).map((s) => (
-                    <tr key={s.id} className="border-t border-border hover:bg-secondary/40 transition-colors">
-                      <td className="px-5 py-3 text-sm font-medium">{s.name}</td>
-                      {courseAssignments.map((a) => (
-                        <td key={a.id} className="px-3 py-3 text-center">
-                          <Input
-                            className="w-16 h-8 text-center mx-auto"
-                            placeholder="—"
-                            value={editingGrades[`${s.id}-${a.id}`] || ''}
-                            onChange={(e) => setEditingGrades({
-                              ...editingGrades,
-                              [`${s.id}-${a.id}`]: e.target.value
-                            })}
-                          />
-                        </td>
-                      ))}
-                      <td className="px-3 py-3 text-center font-semibold">
-                        {Math.round(70 + Math.random() * 25)}%
-                      </td>
-                    </tr>
-                  ))}
+                  {course.students.map((s) => {
+                    let total = 0,
+                      count = 0;
+                    course.assignments.forEach((a) => {
+                      const score = course.grades[s.id]?.[a.id];
+                      if (score !== undefined) {
+                        total += score;
+                        count++;
+                      }
+                    });
+                    const final = count > 0 ? Math.round(total / count) : 0;
+                    return (
+                      <tr key={s.id} className="border-t border-border hover:bg-secondary/40 transition-colors">
+                        <td className="px-5 py-3 text-sm font-medium">{s.name}</td>
+                        {course.assignments.map((a) => {
+                          const currentScore = course.grades[s.id]?.[a.id] ?? '';
+                          return (
+                            <td key={a.id} className="px-3 py-3 text-center">
+                              <Input
+                                className="w-16 h-8 text-center mx-auto"
+                                placeholder="—"
+                                value={
+                                  editingGrades[`${s.id}-${a.id}`] !== undefined
+                                    ? editingGrades[`${s.id}-${a.id}`]
+                                    : currentScore
+                                }
+                                onChange={(e) =>
+                                  setEditingGrades({
+                                    ...editingGrades,
+                                    [`${s.id}-${a.id}`]: e.target.value,
+                                  })
+                                }
+                              />
+                            </td>
+                          );
+                        })}
+                        <td className="px-3 py-3 text-center font-semibold">{final > 0 ? `${final}%` : '—'}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
             <div className="px-5 py-4 border-t border-border flex justify-end">
-              <Button onClick={() => toast.success('Grades saved successfully')}>
-                Save All Grades
-              </Button>
+              <Button onClick={handleSaveGrades}>Save All Grades</Button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ─── Discussion Tab ──────────────────────────────────── */}
+      {/* Discussion Tab – kept as placeholder, you can extend similarly */}
       {tab === 'discussion' && (
         <div className="space-y-4">
-          {[
-            {
-              author: 'Nurul Ain Farhana',
-              initials: 'NA',
-              time: '2h ago',
-              body: 'Can someone explain the practical difference between min-heap and max-heap? I understand the theory but am unsure when to prefer one over the other.',
-              replies: 3,
-              likes: 5,
-              lecturer: false,
-            },
-            {
-              author: 'Danial Haziq',
-              initials: 'DH',
-              time: '5h ago',
-              body: 'For the binary tree traversal assignment — are we expected to implement all three traversals (pre/in/post-order) or just one?',
-              replies: 7,
-              likes: 2,
-              lecturer: false,
-            },
-            {
-              author: 'Dr. Sarah Chen',
-              initials: 'SC',
-              time: 'Yesterday 4:15 PM',
-              body: 'Reminder: Lab 8 will focus on AVL tree rotations. Please review Chapter 7 before attending. The lab worksheet will be available Monday morning on this portal.',
-              replies: 1,
-              likes: 14,
-              lecturer: true,
-            },
-          ].map((post, i) => (
-            <div key={i} className="bg-card border border-border rounded-2xl p-5">
-              <div className="flex items-start gap-3">
-                <div
-                  className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white"
-                  style={{
-                    background: post.lecturer ? course.color : 'var(--secondary)',
-                    color: post.lecturer ? 'white' : 'var(--muted-foreground)',
-                  }}
-                >
-                  {post.initials}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 flex-wrap mb-1.5">
-                    <span className="text-sm font-semibold text-foreground">{post.author}</span>
-                    {post.lecturer && (
-                      <span className="text-[9px] bg-primary/15 text-primary px-2 py-0.5 rounded-full font-semibold uppercase tracking-wide">
-                        Lecturer
-                      </span>
-                    )}
-                    <span className="text-[11px] text-muted-foreground">{post.time}</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{post.body}</p>
-                  <div className="flex items-center gap-5 mt-3">
-                    <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
-                      <MessageCircle size={12} /> {post.replies}
-                    </button>
-                    <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors">
-                      <ThumbsUp size={12} /> {post.likes}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-          <div className="bg-card border border-border rounded-2xl p-4 flex gap-3">
-            <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-xs font-bold text-primary-foreground flex-shrink-0">
-              SC
-            </div>
-            <div className="flex-1 flex gap-2">
-              <input
-                placeholder="Post a reply as lecturer…"
-                className="flex-1 bg-secondary rounded-xl px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-              />
-              <button className="bg-primary text-primary-foreground rounded-xl px-4 hover:opacity-90 transition-opacity">
-                <Send size={13} />
-              </button>
-            </div>
+          <div className="bg-card border border-border rounded-2xl p-10 text-center text-muted-foreground">
+            Discussion feature coming soon.
           </div>
         </div>
       )}
 
-      {/* ─── Announcement Modal ────────────────────────────── */}
+      {/* ─── Modals ────────────────────────────────────────── */}
+
+      {/* Announcement Modal */}
       <Dialog open={showAnnounceModal} onOpenChange={setShowAnnounceModal}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
@@ -760,17 +801,125 @@ export function LecturerCourseDetail() {
                 checked={newAnnouncement.pinned}
                 onChange={(e) => setNewAnnouncement({ ...newAnnouncement, pinned: e.target.checked })}
               />
-              <Label htmlFor="ann-pin" className="text-sm">Pin this announcement</Label>
+              <Label htmlFor="ann-pin" className="text-sm">
+                Pin this announcement
+              </Label>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowAnnounceModal(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setShowAnnounceModal(false)}>
+              Cancel
+            </Button>
             <Button onClick={handlePostAnnouncement}>Post Announcement</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* ─── Quiz Modal ────────────────────────────────────── */}
+      {/* Material Modal – kept for quick upload, but the main upload is on separate page */}
+      <Dialog open={showMaterialModal} onOpenChange={setShowMaterialModal}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Quick Upload</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="mat-title">Title</Label>
+              <Input
+                id="mat-title"
+                value={newMaterial.title}
+                onChange={(e) => setNewMaterial({ ...newMaterial, title: e.target.value })}
+                placeholder="e.g., Lecture 3 slides"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="mat-type">Type</Label>
+              <Select
+                value={newMaterial.type}
+                onValueChange={(val: any) => setNewMaterial({ ...newMaterial, type: val })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pdf">PDF</SelectItem>
+                  <SelectItem value="video">Video</SelectItem>
+                  <SelectItem value="link">Link</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="mat-url">URL (optional)</Label>
+              <Input
+                id="mat-url"
+                value={newMaterial.url}
+                onChange={(e) => setNewMaterial({ ...newMaterial, url: e.target.value })}
+                placeholder="https://..."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowMaterialModal(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUploadMaterial}>Upload</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Assignment Modal */}
+      <Dialog open={showAssignmentModal} onOpenChange={setShowAssignmentModal}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Create New Assignment</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="ass-title">Title</Label>
+              <Input
+                id="ass-title"
+                value={newAssignment.title}
+                onChange={(e) => setNewAssignment({ ...newAssignment, title: e.target.value })}
+                placeholder="e.g., Programming Project"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ass-due">Due Date</Label>
+              <Input
+                id="ass-due"
+                type="date"
+                value={newAssignment.dueDate}
+                onChange={(e) => setNewAssignment({ ...newAssignment, dueDate: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ass-weight">Weight (%)</Label>
+              <Input
+                id="ass-weight"
+                type="number"
+                value={newAssignment.weight}
+                onChange={(e) => setNewAssignment({ ...newAssignment, weight: parseFloat(e.target.value) || 0 })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ass-type">Type</Label>
+              <Input
+                id="ass-type"
+                value={newAssignment.type}
+                onChange={(e) => setNewAssignment({ ...newAssignment, type: e.target.value })}
+                placeholder="e.g., Programming, Report, Quiz"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAssignmentModal(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateAssignment}>Create</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Quiz Modal – with maxAttempts field */}
       <Dialog open={showQuizModal} onOpenChange={setShowQuizModal}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
@@ -801,8 +950,9 @@ export function LecturerCourseDetail() {
                 <Input
                   id="quiz-duration"
                   type="number"
+                  min={1}
                   value={newQuiz.duration}
-                  onChange={(e) => setNewQuiz({ ...newQuiz, duration: parseInt(e.target.value) })}
+                  onChange={(e) => setNewQuiz({ ...newQuiz, duration: parseInt(e.target.value) || 1 })}
                 />
               </div>
               <div className="space-y-2">
@@ -810,16 +960,27 @@ export function LecturerCourseDetail() {
                 <Input
                   id="quiz-questions"
                   type="number"
+                  min={1}
                   value={newQuiz.totalQuestions}
-                  onChange={(e) => setNewQuiz({ ...newQuiz, totalQuestions: parseInt(e.target.value) })}
+                  onChange={(e) => setNewQuiz({ ...newQuiz, totalQuestions: parseInt(e.target.value) || 1 })}
                 />
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="quiz-maxAttempts">Max Attempts</Label>
+              <Input
+                id="quiz-maxAttempts"
+                type="number"
+                min={1}
+                value={newQuiz.maxAttempts}
+                onChange={(e) => setNewQuiz({ ...newQuiz, maxAttempts: parseInt(e.target.value) || 1 })}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="quiz-status">Status</Label>
               <Select
                 value={newQuiz.status}
-                onValueChange={(value) => setNewQuiz({ ...newQuiz, status: value as any })}
+                onValueChange={(value: any) => setNewQuiz({ ...newQuiz, status: value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select status" />
@@ -833,7 +994,9 @@ export function LecturerCourseDetail() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowQuizModal(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setShowQuizModal(false)}>
+              Cancel
+            </Button>
             <Button onClick={handleCreateQuiz}>Create Quiz</Button>
           </DialogFooter>
         </DialogContent>

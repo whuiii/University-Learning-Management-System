@@ -4,7 +4,8 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { LoginPage } from './components/common';
 import { ProtectedLayout } from './layouts/ProtectedLayout';
 import { StudentDashboard, StudentSettings, StudentCalendar, StudentAttendance } from './components/student';
-import { LecturerDashboard, LecturerCourses, LecturerCourseDetail, LecturerSettings, LecturerAttendanceSessions, LecturerAttendanceSessionDetail, LecturerAttendanceMatrix, LecturerStudentPerformance } from './components/lecturer';
+import { LecturerDashboard, LecturerCourses, LecturerCourseDetail, LecturerSettings, LecturerAttendanceSessions, LecturerAttendanceSessionDetail, LecturerAttendanceMatrix, LecturerStudentPerformance, LecturerUploadMaterial } from './components/lecturer';
+import { LecturerGrading} from './components/lecturer/LecturerGrading';
 import { AdminDashboard } from './components/admin';
 import {
   AdminRoles,
@@ -52,8 +53,8 @@ function AppRoutes() {
           // Lecturer routes (with /lecturer prefix)
           <Route path="lecturer/courses" element={<LecturerCourses />} />
           <Route path="lecturer/courses/:courseId" element={<LecturerCourseDetail />} />
-          <Route path="lecturer/grading" element={<PlaceholderPage />} />
-          <Route path="lecturer/questions" element={<PlaceholderPage />} />
+          <Route path="lecturer/courses/:courseId/materials/upload" element={<LecturerUploadMaterial />} />
+          <Route path="lecturer/grading" element={<LecturerGrading />} />
           <Route path="lecturer/performance" element={<LecturerStudentPerformance />} />
           <Route path="lecturer/attendance" element={<LecturerAttendanceSessions />} />
           <Route path="lecturer/attendance/session/:courseId/:type" element={<LecturerAttendanceSessionDetail />} />
