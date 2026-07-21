@@ -1,8 +1,37 @@
+// src/app/hooks/useCourseData.ts
+
 import { useState, useEffect } from 'react';
 import { FullCourse, Material, Assignment, Quiz, Announcement } from '../../types';
-import { generateSeedFullCourse } from '../../data';
+import { COURSES } from '../../data';
 
 const STORAGE_KEY_PREFIX = 'courseData_';
+
+// ─── Helper: Build a FullCourse from static COURSES ──────
+function createFullCourseFromCourse(courseId: string): FullCourse {
+  const base = COURSES.find((c) => c.id === courseId);
+  if (!base) {
+    throw new Error(`Course with id "${courseId}" not found`);
+  }
+  return {
+    ...base,
+    learningOutcomes: base.learningOutcomes || [],
+    materials: [],
+    assignments: [],
+    quizzes: [],
+    announcements: [],
+    students: [
+      { id: 's1', name: 'Ahmad Fariz', email: 'ahmad.fariz@utp.edu.my' },
+      { id: 's2', name: 'Nurul Ain Farhana', email: 'nurul.ain@utp.edu.my' },
+      { id: 's3', name: 'Danial Haziq', email: 'danial.haziq@utp.edu.my' },
+      { id: 's4', name: 'Farah Syahirah', email: 'farah.syahirah@utp.edu.my' },
+      { id: 's5', name: 'Hazwan Zulkifli', email: 'hazwan.zulkifli@utp.edu.my' },
+      { id: 's6', name: 'Lim Wei Xian', email: 'lim.weixian@utp.edu.my' },
+      { id: 's7', name: 'Nurul Izzah', email: 'nurul.izzah@utp.edu.my' },
+      { id: 's8', name: 'Muhammad Firdaus', email: 'muhammad.firdaus@utp.edu.my' },
+    ],
+    grades: {},
+  };
+}
 
 export function useCourseData(courseId: string) {
   const [courseData, setCourseData] = useState<FullCourse | null>(null);
@@ -16,7 +45,7 @@ export function useCourseData(courseId: string) {
     if (stored) {
       data = JSON.parse(stored);
     } else {
-      data = generateSeedFullCourse(courseId);
+      data = createFullCourseFromCourse(courseId);
       localStorage.setItem(key, JSON.stringify(data));
     }
     setCourseData(data);
@@ -25,7 +54,8 @@ export function useCourseData(courseId: string) {
 
   const updateCourseData = (newData: FullCourse | ((prev: FullCourse) => FullCourse)) => {
     setCourseData((prev) => {
-      const updated = typeof newData === 'function' ? newData(prev!) : newData;
+      if (!prev) return prev;
+      const updated = typeof newData === 'function' ? newData(prev) : newData;
       localStorage.setItem(STORAGE_KEY_PREFIX + courseId, JSON.stringify(updated));
       return updated;
     });
@@ -95,12 +125,11 @@ export function useCourseData(courseId: string) {
 
   // ─── Announcement CRUD ────────────────────────────────────
   const addAnnouncement = (announcement: Omit<Announcement, 'id' | 'date' | 'author'>) => {
-    // You may want to get the lecturer name from auth context; hardcode for now
     const newAnnouncement: Announcement = {
       ...announcement,
       id: `ann-${Date.now()}`,
       date: new Date().toISOString().split('T')[0],
-      author: 'Dr. Sarah Chen', // replace with actual user
+      author: 'Dr. Sarah Chen', // can be replaced with actual user from auth context
     };
     updateCourseData((prev) => ({
       ...prev,

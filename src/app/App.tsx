@@ -19,7 +19,7 @@ import {
   AdminSettings,
 } from './components/admin';
 import { CoursesView, CourseDetailView } from './components/courses';
-import { AssignmentsView } from './components/assignments';
+import { AssignmentsView, AssignmentDetailView } from './components/assignments';
 import { GradesView } from './components/grades';
 import { AnnouncementsView } from './components/announcements';
 import { Toaster } from 'sonner';
@@ -40,6 +40,7 @@ function AppRoutes() {
           <Route path="courses" element={<CoursesView />} />
           <Route path="courses/:courseId" element={<CourseDetailView />} />
           <Route path="assignments" element={<AssignmentsView />} />
+          <Route path="/assignments/:assignmentId" element={<AssignmentDetailView />} />
           <Route path="grades" element={<GradesView />} />
           <Route path="announcements" element={<AnnouncementsView />} />
 

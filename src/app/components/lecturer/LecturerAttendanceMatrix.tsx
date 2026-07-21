@@ -22,6 +22,7 @@ import {
 import { Download, Edit, Save, ChevronLeft, Eye } from 'lucide-react';
 import { CLASS_SCHEDULE, COURSES } from '../../data';
 import { serif, mono } from '../../utils/helpers';
+
 type AttendanceStatus = 'present' | 'absent' | 'absent_with_reason';
 
 interface AttendanceRecord {
@@ -97,11 +98,12 @@ export function LecturerAttendanceMatrix() {
     return null;
   }
 
+  // ─── FIX: filter sessions by courseCode instead of courseId ───
   const sessions = useMemo(() => {
     return CLASS_SCHEDULE
-      .filter((s) => s.courseId === courseId)
+      .filter((s) => s.courseCode === course.code)   // <-- changed from s.courseId
       .sort((a, b) => new Date(a.date + 'T' + a.startTime).getTime() - new Date(b.date + 'T' + b.startTime).getTime());
-  }, [courseId]);
+  }, [course]);
 
   useEffect(() => {
     if (!courseId) return;

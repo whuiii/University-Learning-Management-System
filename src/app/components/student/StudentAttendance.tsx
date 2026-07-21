@@ -16,9 +16,9 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
-import { CLASS_SCHEDULE, ATTENDANCE_RECORDS } from '../../data';
 import { serif } from '../../utils/helpers';
-import type { ClassSchedule } from '../../data';
+import { CLASS_SCHEDULE, ATTENDANCE_RECORDS } from '../../data';
+import type { ClassSchedule } from '../../types';
 
 // ---------- Types ----------
 type AttendanceStatus = 'present' | 'absent' | 'missed' | 'upcoming' | 'not_started' | 'available';

@@ -1,6 +1,6 @@
 // src/data/index.ts
 
-import { Course, GradingData } from '../types';
+import { Course, GradingData, StudentPerformance , ClassSchedule, Quiz, Assignment} from '../types';
 
 // ─────────────────────────────────────────────────────────────
 //  COURSES (12 courses)
@@ -222,7 +222,7 @@ export const COURSES: Course[] = [
 //  ASSIGNMENTS
 // ─────────────────────────────────────────────────────────────
 
-export const ASSIGNMENTS = [
+export const ASSIGNMENTS: Assignment[] = [
   {
     id: "a1",
     courseId: "cs201",
@@ -232,6 +232,19 @@ export const ASSIGNMENTS = [
     weight: 15,
     type: "Programming",
     score: undefined,
+    instructions:
+      "Implement a Binary Search Tree (BST) with the following operations:\n" +
+      "- `insert(key)` – add a node\n" +
+      "- `delete(key)` – remove a node\n" +
+      "- `search(key)` – find a node\n" +
+      "- `inorder()` – return sorted list\n\n" +
+      "Provide complexity analysis (time & space) for each operation.\n" +
+      "Write test cases to verify correctness.",
+    attachments: [
+      { name: "BST_Starter_Code.zip", url: "#" },
+      { name: "BST_Assignment_Spec.pdf", url: "#" },
+    ],
+    submissionType: "file",
   },
   {
     id: "a2",
@@ -242,6 +255,18 @@ export const ASSIGNMENTS = [
     weight: 20,
     type: "Programming",
     score: undefined,
+    instructions:
+      "Implement Breadth‑First Search (BFS) and Depth‑First Search (DFS) on an adjacency list graph.\n" +
+      "Your implementation should:\n" +
+      "- Build a graph from input edges\n" +
+      "- Perform both traversals from a given start node\n" +
+      "- Print the order of visited nodes\n" +
+      "Extra: detect cycles in directed graphs.",
+    attachments: [
+      { name: "graph_traversal_template.py", url: "#" },
+      { name: "sample_inputs.txt", url: "#" },
+    ],
+    submissionType: "file",
   },
   {
     id: "a3",
@@ -252,6 +277,17 @@ export const ASSIGNMENTS = [
     weight: 10,
     type: "Assignment",
     score: undefined,
+    instructions:
+      "Given a set of SQL queries and a sample database schema, rewrite the queries to improve performance.\n" +
+      "Provide:\n" +
+      "- Original query and its execution plan\n" +
+      "- Optimised query and new execution plan\n" +
+      "- Explanation of changes (indexes, joins, subqueries, etc.)",
+    attachments: [
+      { name: "queries.sql", url: "#" },
+      { name: "schema_diagram.png", url: "#" },
+    ],
+    submissionType: "both",
   },
   {
     id: "a4",
@@ -262,6 +298,18 @@ export const ASSIGNMENTS = [
     weight: 10,
     type: "Project",
     score: 85,
+    instructions:
+      "As a team, conduct a sprint planning session for a new feature.\n" +
+      "Deliverables:\n" +
+      "- Sprint backlog (user stories with points)\n" +
+      "- Sprint goal and timeline\n" +
+      "- Risk assessment\n" +
+      "Submit your team's presentation slides and backlog spreadsheet.",
+    attachments: [
+      { name: "Sprint_Planning_Template.xlsx", url: "#" },
+      { name: "Sample_Backlog.pdf", url: "#" },
+    ],
+    submissionType: "file",
   },
   {
     id: "a5",
@@ -272,6 +320,16 @@ export const ASSIGNMENTS = [
     weight: 15,
     type: "Design",
     score: undefined,
+    instructions:
+      "Draw a Use Case Diagram for a Library Management System.\n" +
+      "Include at least 5 actors and 10 use cases.\n" +
+      "Write a brief description for each use case.\n" +
+      "Submit your diagram as a PDF or image, and the description as a text file.",
+    attachments: [
+      { name: "Use_Case_Template.md", url: "#" },
+      { name: "Example_Use_Case.png", url: "#" },
+    ],
+    submissionType: "both",
   },
   {
     id: "a6",
@@ -282,6 +340,17 @@ export const ASSIGNMENTS = [
     weight: 10,
     type: "Lab",
     score: undefined,
+    instructions:
+      "Using Cisco Packet Tracer, build a network with:\n" +
+      "- 2 routers, 3 switches, and 6 end devices\n" +
+      "- Configure static routing and VLANs\n" +
+      "- Test connectivity using ping and traceroute\n" +
+      "Submit your .pkt file and a report with screenshots.",
+    attachments: [
+      { name: "Lab_Instructions.pdf", url: "#" },
+      { name: "Starting_Topology.pkt", url: "#" },
+    ],
+    submissionType: "file",
   },
   {
     id: "a7",
@@ -292,6 +361,17 @@ export const ASSIGNMENTS = [
     weight: 10,
     type: "Lab",
     score: 92,
+    instructions:
+      "Capture network traffic using Wireshark and analyse:\n" +
+      "- TCP handshake\n" +
+      "- HTTP request/response\n" +
+      "- DNS query\n" +
+      "Answer the questions in the provided worksheet.",
+    attachments: [
+      { name: "Wireshark_Worksheet.docx", url: "#" },
+      { name: "capture_sample.pcapng", url: "#" },
+    ],
+    submissionType: "file",
   },
   {
     id: "a8",
@@ -302,6 +382,17 @@ export const ASSIGNMENTS = [
     weight: 20,
     type: "Assignment",
     score: undefined,
+    instructions:
+      "Solve the following DP problems (provide code and explanation):\n" +
+      "1. Fibonacci (bottom‑up and memoization)\n" +
+      "2. Longest Common Subsequence\n" +
+      "3. 0/1 Knapsack\n" +
+      "For each, explain the recurrence and time complexity.",
+    attachments: [
+      { name: "dp_problems.pdf", url: "#" },
+      { name: "starter_code.zip", url: "#" },
+    ],
+    submissionType: "both",
   },
   {
     id: "a9",
@@ -312,6 +403,15 @@ export const ASSIGNMENTS = [
     weight: 25,
     type: "Project",
     score: undefined,
+    instructions:
+      "Implement a feedforward neural network from scratch (no high‑level libraries).\n" +
+      "Train it on the MNIST dataset.\n" +
+      "Report accuracy and provide a Jupyter notebook with your code, training logs, and visualisations.",
+    attachments: [
+      { name: "MNIST_data.zip", url: "#" },
+      { name: "network_architecture.png", url: "#" },
+    ],
+    submissionType: "file",
   },
   {
     id: "a10",
@@ -322,6 +422,16 @@ export const ASSIGNMENTS = [
     weight: 10,
     type: "Quiz",
     score: 78,
+    instructions:
+      "Answer the following questions (max 500 words):\n" +
+      "1. Explain symmetric vs asymmetric encryption.\n" +
+      "2. What is a hash function and where is it used?\n" +
+      "3. Describe the RSA algorithm briefly.\n" +
+      "Submit your answers as a PDF or text file.",
+    attachments: [
+      { name: "crypto_questions.pdf", url: "#" },
+    ],
+    submissionType: "text",
   },
 ];
 
@@ -423,23 +533,7 @@ export const SEMESTERS = Array.from(semesterMap.entries()).map(
   }
 );
 
-// ─────────────────────────────────────────────────────────────
-//  CLASS SCHEDULE & ATTENDANCE (for StudentAttendance)
-// ─────────────────────────────────────────────────────────────
 
-export interface ClassSchedule {
-  id: string;
-  courseCode: string;
-  title: string;
-  date: string;          // YYYY-MM-DD
-  startTime: string;     // HH:mm
-  endTime: string;
-  location: {
-    lat: number;
-    lng: number;
-    address: string;
-  };
-}
 
 // Helper to get week start (Monday)
 function getWeekStart(date: Date): Date {
@@ -546,4 +640,317 @@ export const ASSESSMENT_TYPES = [
 // Optional helper to initialise empty grading data for a course
 export function createEmptyGradingData(): GradingData {
   return { assessments: [], scores: {} };
+}
+
+
+// ─────────────────────────────────────────────────────────────
+//  QUIZZES  (NEW – needed by LecturerStudentPerformance)
+// ─────────────────────────────────────────────────────────────
+export const QUIZZES: Quiz[] = [
+  {
+    id: 'q1',
+    courseId: 'cs201',
+    title: 'Data Structures Quiz 1',
+    dueDate: '2025-02-14',
+    duration: 30,
+    totalQuestions: 10,
+    status: 'available',
+    score: null,
+    attempts: 0,
+    maxAttempts: 2,
+  },
+  {
+    id: 'q2',
+    courseId: 'cs201',
+    title: 'Algorithms Quiz 2',
+    dueDate: '2025-03-01',
+    duration: 45,
+    totalQuestions: 12,
+    status: 'upcoming',
+    score: null,
+    attempts: 0,
+    maxAttempts: 2,
+  },
+  {
+    id: 'q3',
+    courseId: 'cs302',
+    title: 'Software Engineering Quiz',
+    dueDate: '2025-02-20',
+    duration: 20,
+    totalQuestions: 8,
+    status: 'completed',
+    score: 85,
+    attempts: 1,
+    maxAttempts: 3,
+  },
+  {
+    id: 'q4',
+    courseId: 'cs301',
+    title: 'SQL Fundamentals Quiz',
+    dueDate: '2025-02-12',
+    duration: 25,
+    totalQuestions: 10,
+    status: 'graded',
+    score: 92,
+    attempts: 1,
+    maxAttempts: 2,
+  },
+  {
+    id: 'q5',
+    courseId: 'cs401',
+    title: 'Network Protocols Quiz',
+    dueDate: '2025-02-28',
+    duration: 30,
+    totalQuestions: 10,
+    status: 'available',
+    score: null,
+    attempts: 0,
+    maxAttempts: 2,
+  },
+];
+
+
+// ─────────────────────────────────────────────────────────────
+//  MATERIALS (mock data for course materials)
+// ─────────────────────────────────────────────────────────────
+
+export const MATERIALS = [
+  {
+    id: 'mat1',
+    type: 'pdf' as const,
+    title: 'Lecture 1: Introduction to Data Structures',
+    date: '2025-01-15',
+    size: '2.4 MB',
+  },
+  {
+    id: 'mat2',
+    type: 'video' as const,
+    title: 'Lecture 2: Arrays and Linked Lists',
+    date: '2025-01-20',
+    duration: '42 min',
+  },
+  {
+    id: 'mat3',
+    type: 'pdf' as const,
+    title: 'Lab 1: Implementing a Stack',
+    date: '2025-01-22',
+    size: '1.1 MB',
+  },
+  {
+    id: 'mat4',
+    type: 'video' as const,
+    title: 'Lecture 3: Trees and Heaps',
+    date: '2025-01-27',
+    duration: '38 min',
+  },
+  {
+    id: 'mat5',
+    type: 'pdf' as const,
+    title: 'Assignment 1 Specification',
+    date: '2025-02-01',
+    size: '0.8 MB',
+  },
+  {
+    id: 'mat6',
+    type: 'video' as const,
+    title: 'Lecture 4: Hash Tables',
+    date: '2025-02-03',
+    duration: '45 min',
+  },
+  {
+    id: 'mat7',
+    type: 'pdf' as const,
+    title: 'Lab 2: Binary Search Trees',
+    date: '2025-02-05',
+    size: '1.3 MB',
+  },
+];
+
+
+// ─────────────────────────────────────────────────────────────
+//  CLASS SCHEDULE (TIMETABLE) – NEW REALISTIC GENERATION
+// ─────────────────────────────────────────────────────────────
+
+// Helper: Get the Monday of the current week
+function getThisWeekMonday(): Date {
+  const now = new Date();
+  const day = now.getDay();
+  const diff = (day === 0 ? 6 : day - 1); // Monday = 0 diff
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - diff);
+  monday.setHours(0, 0, 0, 0);
+  return monday;
+}
+
+// Generate dates for each weekday (Mon–Fri) for a given week offset
+function getWeekDates(weekOffset: number): Record<string, string> {
+  const monday = getThisWeekMonday();
+  monday.setDate(monday.getDate() + weekOffset * 7);
+  const dates: Record<string, string> = {};
+  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+  days.forEach((day, idx) => {
+    const d = new Date(monday);
+    d.setDate(d.getDate() + idx);
+    dates[day] = d.toISOString().split('T')[0];
+  });
+  return dates;
+}
+
+// Define a student's weekly timetable (courses, days, times, rooms)
+// Each entry: { courseCode, title, day, startTime, endTime, room, type? }
+const timetableTemplate: {
+  courseCode: string;
+  title: string;
+  day: string; // 'Monday'...'Friday'
+  startTime: string; // HH:mm
+  endTime: string;
+  room: string;
+  type?: 'lecture' | 'lab' | 'tutorial';
+}[] = [
+  // CS201: Data Structures & Algorithms (Dr. Sarah Chen)
+  {
+    courseCode: 'CS201',
+    title: 'Data Structures & Algorithms',
+    day: 'Monday',
+    startTime: '10:00',
+    endTime: '12:00',
+    room: 'DK3',
+    type: 'lecture',
+  },
+  {
+    courseCode: 'CS201',
+    title: 'Data Structures Lab',
+    day: 'Wednesday',
+    startTime: '14:00',
+    endTime: '16:00',
+    room: 'Lab B',
+    type: 'lab',
+  },
+  {
+    courseCode: 'CS201',
+    title: 'Data Structures Tutorial',
+    day: 'Friday',
+    startTime: '09:00',
+    endTime: '10:00',
+    room: 'Room 301',
+    type: 'tutorial',
+  },
+
+  // CS301: Database Systems (Prof. Mohd Raza)
+  {
+    courseCode: 'CS301',
+    title: 'Database Systems',
+    day: 'Tuesday',
+    startTime: '14:00',
+    endTime: '16:00',
+    room: 'DK2',
+    type: 'lecture',
+  },
+  {
+    courseCode: 'CS301',
+    title: 'Database Lab',
+    day: 'Thursday',
+    startTime: '10:00',
+    endTime: '12:00',
+    room: 'Lab C',
+    type: 'lab',
+  },
+
+  // CS302: Software Engineering (Dr. Priya Narayanan)
+  {
+    courseCode: 'CS302',
+    title: 'Software Engineering',
+    day: 'Wednesday',
+    startTime: '10:00',
+    endTime: '12:00',
+    room: 'DK1',
+    type: 'lecture',
+  },
+  {
+    courseCode: 'CS302',
+    title: 'Software Engineering Lab',
+    day: 'Friday',
+    startTime: '14:00',
+    endTime: '16:00',
+    room: 'Lab D',
+    type: 'lab',
+  },
+
+  // CS401: Computer Networks (Dr. James Okafor)
+  {
+    courseCode: 'CS401',
+    title: 'Computer Networks',
+    day: 'Thursday',
+    startTime: '14:00',
+    endTime: '16:00',
+    room: 'DK3',
+    type: 'lecture',
+  },
+  {
+    courseCode: 'CS401',
+    title: 'Networks Lab',
+    day: 'Tuesday',
+    startTime: '09:00',
+    endTime: '11:00',
+    room: 'Lab E',
+    type: 'lab',
+  },
+
+  // CS203: Algorithm Design & Analysis (Dr. Sarah Chen)
+  {
+    courseCode: 'CS203',
+    title: 'Algorithm Design & Analysis',
+    day: 'Monday',
+    startTime: '14:00',
+    endTime: '16:00',
+    room: 'DK2',
+    type: 'lecture',
+  },
+  {
+    courseCode: 'CS203',
+    title: 'Algorithms Tutorial',
+    day: 'Wednesday',
+    startTime: '16:00',
+    endTime: '17:00',
+    room: 'Room 305',
+    type: 'tutorial',
+  },
+];
+
+// Generate the actual schedule for the current semester (14 weeks)
+const semesterWeeks = 14;
+
+// Location mapping (room -> lat/lng)
+const locationMap: Record<string, { lat: number; lng: number; address: string }> = {
+  'DK3': { lat: 3.140, lng: 101.687, address: 'DK3, Faculty of Computer Science' },
+  'DK2': { lat: 3.139, lng: 101.686, address: 'DK2, Faculty of Computer Science' },
+  'DK1': { lat: 3.138, lng: 101.685, address: 'DK1, Faculty of Computer Science' },
+  'Lab B': { lat: 3.139, lng: 101.687, address: 'Lab B, Faculty of Computer Science' },
+  'Lab C': { lat: 3.138, lng: 101.686, address: 'Lab C, Faculty of Computer Science' },
+  'Lab D': { lat: 3.139, lng: 101.688, address: 'Lab D, Faculty of Computer Science' },
+  'Lab E': { lat: 3.140, lng: 101.689, address: 'Lab E, Faculty of Computer Science' },
+  'Room 301': { lat: 3.138, lng: 101.685, address: 'Room 301, Faculty of Computer Science' },
+  'Room 305': { lat: 3.137, lng: 101.684, address: 'Room 305, Faculty of Computer Science' },
+};
+
+for (let week = 0; week < semesterWeeks; week++) {
+  const weekDates = getWeekDates(week);
+  timetableTemplate.forEach((entry) => {
+    const dateStr = weekDates[entry.day];
+    if (!dateStr) return;
+    const location = locationMap[entry.room] || {
+      lat: 3.140,
+      lng: 101.687,
+      address: entry.room,
+    };
+    scheduleEntries.push({
+      id: `schedule-${week}-${entry.courseCode}-${entry.day}-${entry.startTime}`,
+      courseCode: entry.courseCode,
+      title: entry.title,
+      date: dateStr,
+      startTime: entry.startTime,
+      endTime: entry.endTime,
+      location,
+    });
+  });
 }

@@ -83,7 +83,7 @@ function generateSystemAttendance(sessionId: string, courseId: string): Record<s
 }
 
 export function LecturerAttendanceSessionDetail() {
-  const { courseId, type } = useParams<{ courseId: string; type: 'lecture' | 'lab' | 'tutorial' }>();
+  const { courseId, type } = useParams<{ courseId: string; type?: 'lecture' | 'lab' | 'tutorial' }>();
   const navigate = useNavigate();
 
   const [attendanceData, setAttendanceData] = useState<Record<string, SessionAttendance>>({});
@@ -98,20 +98,33 @@ export function LecturerAttendanceSessionDetail() {
     return null;
   }
 
-  // All sessions for this course, filtered by type
+  // ─── FIX: filter sessions by courseCode and type (inferred from title) ───
   const sessions = useMemo(() => {
-    if (!courseId || !type) return [];
-    return CLASS_SCHEDULE
-      .filter((s) => s.courseId === courseId && s.type === type)
-      .sort((a, b) => new Date(a.date + 'T' + a.startTime).getTime() - new Date(b.date + 'T' + b.startTime).getTime());
-  }, [courseId, type]);
+    let filtered = CLASS_SCHEDULE.filter((s) => s.courseCode === course.code);
+    if (type) {
+      const typeLower = type.toLowerCase();
+      filtered = filtered.filter((s) =>
+        s.title.toLowerCase().includes(typeLower)
+      );
+    }
+    return filtered.sort(
+      (a, b) => new Date(a.date + 'T' + a.startTime).getTime() - new Date(b.date + 'T' + b.startTime).getTime()
+    );
+  }, [course.code, type]);
 
   // Map week number to session
   const sessionsByWeek = useMemo(() => {
     const map: Record<number, any> = {};
     sessions.forEach((s) => {
-      const match = s.title.match(/(\d+)/);
-      const week = match ? parseInt(match[1]) : Math.ceil((new Date(s.date).getTime() - new Date('2026-07-13').getTime()) / (7 * 24 * 60 * 60 * 1000));
+      // Try to extract week number from title, e.g., "Lecture 5" -> 5
+      const match = s.title.match(/\d+/);
+      let week = match ? parseInt(match[0]) : 0;
+      if (!week) {
+        // Fallback: calculate week based on date relative to a known start (e.g., semester start)
+        // For demo, we'll just use index+1
+        const index = sessions.indexOf(s);
+        week = index + 1;
+      }
       map[week] = s;
     });
     return map;
@@ -158,7 +171,7 @@ export function LecturerAttendanceSessionDetail() {
 
   const isPast = (s: any) => new Date(s.date + 'T' + s.startTime) <= new Date();
 
-  // Enable edit mode – populate editValues and editReasons from current data
+  // Enable edit mode
   const enableEditMode = () => {
     const newEditValues: Record<string, AttendanceStatus> = {};
     const newReasons: Record<string, string> = {};
@@ -175,7 +188,6 @@ export function LecturerAttendanceSessionDetail() {
     setIsEditMode(true);
   };
 
-  // Save changes
   const saveChanges = () => {
     const updatedData = { ...attendanceData };
     sessions.forEach((s) => {
@@ -200,14 +212,12 @@ export function LecturerAttendanceSessionDetail() {
     setIsEditMode(false);
   };
 
-  // Cancel edit mode – discard changes
   const cancelEdit = () => {
     setIsEditMode(false);
     setEditValues({});
     setEditReasons({});
   };
 
-  // Handle status change in edit mode
   const handleStatusChange = (studentId: string, sessionId: string, newStatus: AttendanceStatus) => {
     const key = `${studentId}-${sessionId}`;
     setEditValues((prev) => ({ ...prev, [key]: newStatus }));
@@ -216,7 +226,6 @@ export function LecturerAttendanceSessionDetail() {
     }
   };
 
-  // Handle reason change in edit mode
   const handleReasonChange = (studentId: string, sessionId: string, reason: string) => {
     const key = `${studentId}-${sessionId}`;
     setEditReasons((prev) => ({ ...prev, [key]: reason }));
@@ -253,7 +262,7 @@ export function LecturerAttendanceSessionDetail() {
     });
     const csv = [
       `Course: ${course.code} - ${course.title}`,
-      `Type: ${type?.toUpperCase()}`,
+      `Type: ${type?.toUpperCase() || 'All'}`,
       headers.join(','),
       ...rows.map(row => row.join(',')),
     ].join('\n');
@@ -261,7 +270,7 @@ export function LecturerAttendanceSessionDetail() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `attendance_${courseId}_${type}.csv`;
+    a.download = `attendance_${courseId}_${type || 'all'}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success('Exported');
@@ -272,7 +281,7 @@ export function LecturerAttendanceSessionDetail() {
   );
 
   return (
-    <div  className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <Button variant="ghost" onClick={() => navigate('/lecturer/attendance')} className="mb-2 -ml-2">
@@ -282,7 +291,7 @@ export function LecturerAttendanceSessionDetail() {
             {course.code} – {course.title}
           </h1>
           <p className="text-sm text-muted-foreground">
-            {type?.toUpperCase()} Attendance Matrix (Weeks 1–{maxWeek})
+            {type?.toUpperCase() || 'All'} Attendance Matrix (Weeks 1–{maxWeek})
             {isEditMode ? ' – Edit mode' : ''}
           </p>
         </div>

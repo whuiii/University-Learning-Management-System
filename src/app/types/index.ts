@@ -33,6 +33,8 @@ export interface Material {
   url?: string;
 }
 
+// src/types/index.ts – in the Assignment interface
+
 export interface Assignment {
   id: string;
   courseId: string;
@@ -42,6 +44,10 @@ export interface Assignment {
   type: string;
   status: 'pending' | 'submitted' | 'graded';
   score?: number;
+  // ─── new fields ───
+  instructions?: string;
+  attachments?: { name: string; url: string }[];
+  submissionType?: 'file' | 'text' | 'both';
 }
 
 export interface Quiz {
@@ -93,4 +99,36 @@ export interface Assessment {
 export interface GradingData {
   assessments: Assessment[];
   scores: Record<string, Record<string, number | null>>; // studentId -> assessmentId -> score (null = not started)
+}
+
+// ─── Types ────────────────────────────────────────────────────
+export interface StudentPerformance {
+  studentId: string;
+  name: string;
+  email: string;
+  assignmentScores: Record<string, number>; // assignmentId -> score
+  assignmentAverage: number;
+  quizScores: Record<string, number>; // quizId -> score
+  quizAverage: number;
+  attendance: number; // percentage
+  overallGrade: number;
+  gradeLetter: string;
+}
+
+// ─────────────────────────────────────────────────────────────
+//  CLASS SCHEDULE & ATTENDANCE (for StudentAttendance)
+// ─────────────────────────────────────────────────────────────
+
+export interface ClassSchedule {
+  id: string;
+  courseCode: string;
+  title: string;
+  date: string;          // YYYY-MM-DD
+  startTime: string;     // HH:mm
+  endTime: string;
+  location: {
+    lat: number;
+    lng: number;
+    address: string;
+  };
 }

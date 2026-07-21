@@ -1,4 +1,5 @@
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import {
   CheckCircle2,
   FileText,
@@ -9,13 +10,20 @@ import {
   MessageCircle,
   Send,
   ThumbsUp,
+  Paperclip,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { COURSES, ASSIGNMENTS, MATERIALS, GRADE_HISTORY, QUIZZES } from '../../data';
-import { statusBg, statusColor, statusLabel, serif, mono } from '../../utils/helpers';
+import { statusBg, statusColor, statusLabel, serif, mono, getAssignmentStatusInfo, saveSubmission } from '../../utils/helpers';
 import { useTheme } from '../../contexts/ThemeContext';
 import { toast } from 'sonner';
 import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Textarea } from '../../components/ui/textarea';
+import { Label } from '../../components/ui/label';
+import { Badge } from '../../components/ui/badge';
 
 export function CourseDetailView() {
   const { courseId } = useParams<{ courseId: string }>();
@@ -25,7 +33,6 @@ export function CourseDetailView() {
 
   const course = COURSES.find((c) => c.id === courseId);
   if (!course) {
-    // If course not found, redirect to courses list
     navigate('/courses', { replace: true });
     return null;
   }
@@ -36,19 +43,70 @@ export function CourseDetailView() {
   };
 
   const tabs = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'materials', label: 'Materials' },
-  { id: 'assignments', label: 'Assignments' },
-  { id: 'quizzes', label: 'Quizzes' },   // new
-  { id: 'grades', label: 'Grades' },
-  { id: 'discussion', label: 'Discussion' },
-];
+    { id: 'overview', label: 'Overview' },
+    { id: 'materials', label: 'Materials' },
+    { id: 'assignments', label: 'Assignments' },
+    { id: 'quizzes', label: 'Quizzes' },
+    { id: 'grades', label: 'Grades' },
+    { id: 'discussion', label: 'Discussion' },
+  ];
 
   const courseAssignments = ASSIGNMENTS.filter((a) => a.courseId === course.id);
 
+  // ─── Expanded assignment state ──────────────────────────────
+  const [expandedAssignmentId, setExpandedAssignmentId] = useState<string | null>(null);
+  const [submissionText, setSubmissionText] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const toggleAssignment = (id: string) => {
+    if (expandedAssignmentId === id) {
+      setExpandedAssignmentId(null);
+    } else {
+      setExpandedAssignmentId(id);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
+  const handleSubmit = (assignmentId: string) => {
+    const assignment = courseAssignments.find(a => a.id === assignmentId);
+    if (!assignment) return;
+
+    if (assignment.submissionType === 'file' && !selectedFile) {
+      toast.error('Please attach a file before submitting.');
+      return;
+    }
+    if (assignment.submissionType === 'text' && !submissionText.trim()) {
+      toast.error('Please write something before submitting.');
+      return;
+    }
+    if (assignment.submissionType === 'both' && !submissionText.trim() && !selectedFile) {
+      toast.error('Please provide either text or a file.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setTimeout(() => {
+      saveSubmission(assignment.id, {
+        submittedAt: new Date().toISOString(),
+        status: 'submitted',
+      });
+      toast.success(`Assignment "${assignment.title}" submitted!`);
+      setIsSubmitting(false);
+      setExpandedAssignmentId(null);
+      setSubmissionText('');
+      setSelectedFile(null);
+    }, 1500);
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      {/* Hero */}
+      {/* ─── Hero ────────────────────────────────────────────────── */}
       <div className="rounded-2xl overflow-hidden border border-border">
         <div className="h-44 relative" style={{ background: `${course.color}20` }}>
           <img
@@ -72,7 +130,7 @@ export function CourseDetailView() {
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* ─── Tabs ────────────────────────────────────────────────── */}
       <div className="flex gap-1 bg-secondary rounded-2xl p-1">
         {tabs.map((t) => (
           <button
@@ -87,9 +145,11 @@ export function CourseDetailView() {
         ))}
       </div>
 
-      {/* Tab content */}
+      {/* ─── Tab content ────────────────────────────────────────── */}
+
       {tab === 'overview' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          {/* ... overview content unchanged ... */}
           <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-6">
             <h3 className="font-normal text-foreground mb-3" style={{ fontFamily: serif, fontSize: '1.1rem' }}>
               About this Course
@@ -193,6 +253,7 @@ export function CourseDetailView() {
         </div>
       )}
 
+      {/* ─── Assignments Tab (expandable) ────────────────────── */}
       {tab === 'assignments' && (
         <div className="space-y-3">
           {courseAssignments.length === 0 ? (
@@ -200,30 +261,148 @@ export function CourseDetailView() {
               No assignments yet.
             </div>
           ) : (
-            courseAssignments.map((a) => (
-              <div
-                key={a.id}
-                className="bg-card border border-border rounded-2xl p-5 flex items-center gap-4 hover:border-primary/20 transition-colors"
-              >
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${statusBg(a.status)}`}>
-                  <ClipboardList size={16} className={statusColor(a.status)} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm text-foreground">{a.title}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Due {a.dueDate} · Weight: {a.weight}% · {a.type}
-                  </p>
-                </div>
-                <div className="text-right flex-shrink-0">
-                  <p className={`text-xs font-bold ${statusColor(a.status)}`}>{statusLabel(a.status)}</p>
-                  {'score' in a && a.score != null && (
-                    <p className="text-2xl font-light text-foreground mt-0.5" style={{ fontFamily: serif }}>
-                      {a.score}%
-                    </p>
+            courseAssignments.map((a) => {
+              const statusInfo = getAssignmentStatusInfo(a);
+              const isExpanded = expandedAssignmentId === a.id;
+              const isGraded = a.score !== undefined && a.score !== null;
+              const isSubmitted = statusInfo.label === 'Submitted';
+
+              return (
+                <div key={a.id} className="border border-border rounded-2xl overflow-hidden">
+                  {/* ─── Card header (clickable) ──────────────────── */}
+                  <div
+                    onClick={() => toggleAssignment(a.id)}
+                    className="bg-card p-5 flex items-center gap-4 hover:bg-secondary/20 transition-colors cursor-pointer"
+                  >
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${statusInfo.bg || 'bg-secondary'}`}>
+                      <ClipboardList size={16} className={statusInfo.color} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-sm text-foreground">{a.title}</p>
+                        {isExpanded ? (
+                          <ChevronUp size={16} className="text-muted-foreground" />
+                        ) : (
+                          <ChevronDown size={16} className="text-muted-foreground" />
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Due {a.dueDate} · Weight: {a.weight}% · {a.type}
+                      </p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className={`text-xs font-bold ${statusInfo.color}`}>{statusInfo.label}</p>
+                      {statusInfo.timeNote && (
+                        <p className="text-[10px] mt-0.5 text-muted-foreground" style={{ fontFamily: mono }}>
+                          {statusInfo.timeNote}
+                        </p>
+                      )}
+                      {isGraded && (
+                        <p className="text-2xl font-light text-foreground mt-0.5" style={{ fontFamily: serif }}>
+                          {a.score}%
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* ─── Expanded details ────────────────────────── */}
+                  {isExpanded && (
+                    <div className="bg-card border-t border-border p-5 space-y-4">
+                      {/* Instructions */}
+                      <div>
+                        <h4 className="text-sm font-semibold text-foreground mb-2">Instructions</h4>
+                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                          {a.instructions || 'No specific instructions provided.'}
+                        </p>
+                      </div>
+
+                      {/* Attachments */}
+                      {a.attachments && a.attachments.length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-semibold text-foreground mb-2">Attachments</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {a.attachments.map((att, idx) => (
+                              <a
+                                key={idx}
+                                href={att.url}
+                                className="flex items-center gap-1.5 text-xs bg-secondary px-3 py-1.5 rounded-full hover:bg-secondary/80 transition-colors"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <Paperclip size={12} />
+                                {att.name}
+                                <Download size={10} className="ml-1" />
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Submission area */}
+                      <div className="border-t border-border pt-4 mt-4">
+                        <h4 className="text-sm font-semibold text-foreground mb-3">Your Submission</h4>
+
+                        {isGraded ? (
+                          <div className="bg-secondary/30 rounded-xl p-4 text-center">
+                            <p className="text-sm text-muted-foreground">You scored</p>
+                            <p className="text-3xl font-light text-foreground" style={{ fontFamily: serif }}>
+                              {a.score}%
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">Assignment has been graded.</p>
+                          </div>
+                        ) : isSubmitted ? (
+                          <div className="bg-amber-500/10 rounded-xl p-4 text-center">
+                            <p className="text-sm text-amber-500">Submitted – waiting for grading</p>
+                            <p className="text-xs text-muted-foreground mt-2">{statusInfo.timeNote}</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            {(a.submissionType === 'text' || a.submissionType === 'both') && (
+                              <div>
+                                <Label htmlFor={`submission-text-${a.id}`}>Write your answer</Label>
+                                <Textarea
+                                  id={`submission-text-${a.id}`}
+                                  placeholder="Type your response here..."
+                                  value={submissionText}
+                                  onChange={(e) => setSubmissionText(e.target.value)}
+                                  rows={4}
+                                  className="mt-1"
+                                />
+                              </div>
+                            )}
+
+                            {(a.submissionType === 'file' || a.submissionType === 'both') && (
+                              <div>
+                                <Label htmlFor={`file-upload-${a.id}`}>Upload file</Label>
+                                <Input
+                                  id={`file-upload-${a.id}`}
+                                  type="file"
+                                  onChange={handleFileChange}
+                                  className="mt-1"
+                                />
+                                {selectedFile && (
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
+                                  </p>
+                                )}
+                              </div>
+                            )}
+
+                            <Button
+                              onClick={() => handleSubmit(a.id)}
+                              disabled={isSubmitting}
+                              className="w-full sm:w-auto"
+                            >
+                              {isSubmitting ? 'Submitting...' : <><Send size={14} className="mr-2" /> Submit Assignment</>}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   )}
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       )}
