@@ -146,3 +146,38 @@ export function getAssignmentStatusInfo(assignment: Assignment) {
 export const serif = "'DM Serif Display', Georgia, serif";
 export const sans = "'DM Sans', system-ui, sans-serif";
 export const mono = "'JetBrains Mono', monospace";
+
+// ─── GPA & CGPA functions ──────────────────────────────────
+
+export function gradeValueToPoint(value: number): number {
+  if (value >= 85) return 4.0;
+  if (value >= 80) return 3.7;
+  if (value >= 75) return 3.3;
+  if (value >= 70) return 3.0;
+  if (value >= 65) return 2.7;
+  if (value >= 60) return 2.3;
+  if (value >= 55) return 2.0;
+  if (value >= 50) return 1.7;
+  return 0.0;
+}
+
+export function calculateSemesterGPA(courses: any[]): number | null {
+  if (!courses || courses.length === 0) return null;
+  const totalPoints = courses.reduce((sum, c) => sum + gradeValueToPoint(c.gradeValue), 0);
+  return parseFloat((totalPoints / courses.length).toFixed(2));
+}
+
+export function calculateCGPA(semesters: any[]): number | null {
+  let totalGradePoints = 0;
+  let totalCredits = 0;
+  semesters.forEach(sem => {
+    sem.courses.forEach((c: any) => {
+      if (c.credits) {
+        totalGradePoints += gradeValueToPoint(c.gradeValue) * c.credits;
+        totalCredits += c.credits;
+      }
+    });
+  });
+  if (totalCredits === 0) return null;
+  return parseFloat((totalGradePoints / totalCredits).toFixed(2));
+}

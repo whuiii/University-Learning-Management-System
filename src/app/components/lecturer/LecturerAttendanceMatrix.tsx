@@ -10,7 +10,13 @@ import {
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Input } from '../../components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../components/ui/select';
 import {
   Table,
   TableBody,
@@ -62,7 +68,10 @@ const createRecord = (
   timestamp: new Date().toISOString(),
 });
 
-function generateSystemAttendance(sessionId: string, courseId: string): Record<string, AttendanceRecord> {
+function generateSystemAttendance(
+  sessionId: string,
+  courseId: string
+): Record<string, AttendanceRecord> {
   const records: Record<string, AttendanceRecord> = {};
   studentList.forEach((student) => {
     const seed = sessionId + student.id + courseId;
@@ -86,9 +95,13 @@ export function LecturerAttendanceMatrix() {
   const { courseId } = useParams<{ courseId: string }>();
   const navigate = useNavigate();
 
-  const [attendanceData, setAttendanceData] = useState<Record<string, SessionAttendance>>({});
+  const [attendanceData, setAttendanceData] = useState<
+    Record<string, SessionAttendance>
+  >({});
   const [isEditMode, setIsEditMode] = useState(false);
-  const [editValues, setEditValues] = useState<Record<string, AttendanceStatus>>({});
+  const [editValues, setEditValues] = useState<
+    Record<string, AttendanceStatus>
+  >({});
   const [editReasons, setEditReasons] = useState<Record<string, string>>({});
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -100,9 +113,12 @@ export function LecturerAttendanceMatrix() {
 
   // ─── FIX: filter sessions by courseCode instead of courseId ───
   const sessions = useMemo(() => {
-    return CLASS_SCHEDULE
-      .filter((s) => s.courseCode === course.code)   // <-- changed from s.courseId
-      .sort((a, b) => new Date(a.date + 'T' + a.startTime).getTime() - new Date(b.date + 'T' + b.startTime).getTime());
+    return CLASS_SCHEDULE.filter((s) => s.courseCode === course.code)
+      .sort(
+        (a, b) =>
+          new Date(a.date + 'T' + a.startTime).getTime() -
+          new Date(b.date + 'T' + b.startTime).getTime()
+      );
   }, [course]);
 
   useEffect(() => {
@@ -147,11 +163,12 @@ export function LecturerAttendanceMatrix() {
     return new Date(session.date + 'T' + session.startTime) <= new Date();
   };
 
+  // ---------- FIX: enable edit for ALL sessions (not just past) ----------
   const enableEditMode = () => {
     const newEditValues: Record<string, AttendanceStatus> = {};
     const newReasons: Record<string, string> = {};
     sessions.forEach((session) => {
-      if (!isPast(session)) return;
+      // Removed: if (!isPast(session)) return;
       studentList.forEach((student) => {
         const key = `${student.id}-${session.id}`;
         newEditValues[key] = getStatus(student.id, session.id);
@@ -163,10 +180,11 @@ export function LecturerAttendanceMatrix() {
     setIsEditMode(true);
   };
 
+  // ---------- FIX: save changes for ALL sessions (not just past) ----------
   const saveChanges = () => {
     const updatedData = { ...attendanceData };
     sessions.forEach((session) => {
-      if (!isPast(session)) return;
+      // Removed: if (!isPast(session)) return;
       studentList.forEach((student) => {
         const key = `${student.id}-${session.id}`;
         const newStatus = editValues[key];
@@ -178,7 +196,10 @@ export function LecturerAttendanceMatrix() {
             studentId: student.id,
             status: newStatus,
             source: 'manual',
-            reason: newStatus === 'absent_with_reason' ? editReasons[key] || '' : undefined,
+            reason:
+              newStatus === 'absent_with_reason'
+                ? editReasons[key] || ''
+                : undefined,
             timestamp: new Date().toISOString(),
           };
         }
@@ -189,7 +210,11 @@ export function LecturerAttendanceMatrix() {
     setIsEditMode(false);
   };
 
-  const handleStatusChange = (studentId: string, sessionId: string, newStatus: AttendanceStatus) => {
+  const handleStatusChange = (
+    studentId: string,
+    sessionId: string,
+    newStatus: AttendanceStatus
+  ) => {
     const key = `${studentId}-${sessionId}`;
     setEditValues((prev) => ({ ...prev, [key]: newStatus }));
     if (newStatus !== 'absent_with_reason') {
@@ -198,29 +223,50 @@ export function LecturerAttendanceMatrix() {
   };
 
   const getStudentStats = (studentId: string) => {
-    let total = 0, present = 0, absent = 0, absentWithReason = 0;
+    let total = 0,
+      present = 0,
+      absent = 0,
+      absentWithReason = 0;
     sessions.forEach((session) => {
-      if (!isPast(session)) return;
+      if (!isPast(session)) return; // stats still only count past sessions
       total++;
       const status = getStatus(studentId, session.id);
       if (status === 'present') present++;
       else if (status === 'absent') absent++;
       else if (status === 'absent_with_reason') absentWithReason++;
     });
-    return { total, present, absent, absentWithReason, percentage: total > 0 ? Math.round((present / total) * 100) : 0 };
+    return {
+      total,
+      present,
+      absent,
+      absentWithReason,
+      percentage: total > 0 ? Math.round((present / total) * 100) : 0,
+    };
   };
 
   const handleExport = () => {
-    const headers = ['Student', ...sessions.map((s, i) => `Week ${i+1}`), 'Present', 'Absent', '%'];
+    const headers = [
+      'Student',
+      ...sessions.map((s, i) => `Week ${i + 1}`),
+      'Present',
+      'Absent',
+      '%',
+    ];
     const rows = studentList.map((student) => {
       const stats = getStudentStats(student.id);
       const statuses = sessions.map((s) => getStatus(student.id, s.id));
-      return [student.name, ...statuses, stats.present, stats.absent, `${stats.percentage}%`];
+      return [
+        student.name,
+        ...statuses,
+        stats.present,
+        stats.absent,
+        `${stats.percentage}%`,
+      ];
     });
     const csv = [
       `Course: ${course.code} - ${course.title}`,
       headers.join(','),
-      ...rows.map(row => row.join(',')),
+      ...rows.map((row) => row.join(',')),
     ].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -240,10 +286,17 @@ export function LecturerAttendanceMatrix() {
     <div className="max-w-full mx-auto space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <Button variant="ghost" onClick={() => navigate('/lecturer/attendance')} className="mb-2 -ml-2">
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/lecturer/attendance')}
+            className="mb-2 -ml-2"
+          >
             <ChevronLeft size={14} className="mr-1" /> Back
           </Button>
-          <h1 className="text-2xl font-normal text-foreground" style={{ fontFamily: serif }}>
+          <h1
+            className="text-2xl font-normal text-foreground"
+            style={{ fontFamily: serif }}
+          >
             {course.code} – {course.title}
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -254,13 +307,21 @@ export function LecturerAttendanceMatrix() {
         <div className="flex gap-2">
           {isEditMode ? (
             <>
-              <Button variant="outline" onClick={() => setIsEditMode(false)}>Cancel</Button>
-              <Button onClick={saveChanges}><Save size={14} className="mr-2" /> Save</Button>
+              <Button variant="outline" onClick={() => setIsEditMode(false)}>
+                Cancel
+              </Button>
+              <Button onClick={saveChanges}>
+                <Save size={14} className="mr-2" /> Save
+              </Button>
             </>
           ) : (
             <>
-              <Button variant="outline" onClick={handleExport}><Download size={14} className="mr-2" /> Export</Button>
-              <Button onClick={enableEditMode}><Edit size={14} className="mr-2" /> Edit</Button>
+              <Button variant="outline" onClick={handleExport}>
+                <Download size={14} className="mr-2" /> Export
+              </Button>
+              <Button onClick={enableEditMode}>
+                <Edit size={14} className="mr-2" /> Edit
+              </Button>
             </>
           )}
         </div>
@@ -283,12 +344,20 @@ export function LecturerAttendanceMatrix() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="sticky left-0 bg-card w-[180px] min-w-[160px]">Student</TableHead>
+                  <TableHead className="sticky left-0 bg-card w-[180px] min-w-[160px]">
+                    Student
+                  </TableHead>
                   {sessions.map((session, idx) => (
                     <TableHead key={session.id} className="text-center min-w-[70px]">
                       <div className="text-sm font-semibold">Week {idx + 1}</div>
-                      <div className="text-[9px] text-muted-foreground">{session.startTime}</div>
-                      {!isPast(session) && <Badge variant="secondary" className="text-[8px] mt-0.5">Future</Badge>}
+                      <div className="text-[9px] text-muted-foreground">
+                        {session.startTime}
+                      </div>
+                      {!isPast(session) && (
+                        <Badge variant="secondary" className="text-[8px] mt-0.5">
+                          Future
+                        </Badge>
+                      )}
                     </TableHead>
                   ))}
                   <TableHead className="text-center">P</TableHead>
@@ -301,67 +370,131 @@ export function LecturerAttendanceMatrix() {
                   const stats = getStudentStats(student.id);
                   return (
                     <TableRow key={student.id}>
-                      <TableCell className="sticky left-0 bg-card font-medium">{student.name}</TableCell>
+                      <TableCell className="sticky left-0 bg-card font-medium">
+                        {student.name}
+                      </TableCell>
                       {sessions.map((session) => {
                         const key = `${student.id}-${session.id}`;
                         const isPastSession = isPast(session);
-                        const currentStatus = isEditMode && isPastSession
-                          ? editValues[key] || getStatus(student.id, session.id)
-                          : getStatus(student.id, session.id);
+                        const currentStatus =
+                          isEditMode
+                            ? editValues[key] || getStatus(student.id, session.id)
+                            : getStatus(student.id, session.id);
                         const source = getSource(student.id, session.id);
-                        const reason = isEditMode && isPastSession
-                          ? editReasons[key] || getReason(student.id, session.id)
-                          : getReason(student.id, session.id);
+                        const reason =
+                          isEditMode
+                            ? editReasons[key] || getReason(student.id, session.id)
+                            : getReason(student.id, session.id);
 
+                        // Only apply styling for past sessions in read‑only mode
                         let bgColor = 'bg-secondary/20';
                         let label = '—';
                         let textColor = 'text-muted-foreground';
-                        if (currentStatus === 'present') { bgColor = 'bg-emerald-500/20'; label = '✓'; textColor = 'text-emerald-500'; }
-                        else if (currentStatus === 'absent') { bgColor = 'bg-red-500/20'; label = '✗'; textColor = 'text-red-500'; }
-                        else if (currentStatus === 'absent_with_reason') { bgColor = 'bg-amber-500/20'; label = '⚠'; textColor = 'text-amber-500'; }
+                        if (currentStatus === 'present') {
+                          bgColor = 'bg-emerald-500/20';
+                          label = '✓';
+                          textColor = 'text-emerald-500';
+                        } else if (currentStatus === 'absent') {
+                          bgColor = 'bg-red-500/20';
+                          label = '✗';
+                          textColor = 'text-red-500';
+                        } else if (currentStatus === 'absent_with_reason') {
+                          bgColor = 'bg-amber-500/20';
+                          label = '⚠';
+                          textColor = 'text-amber-500';
+                        }
 
                         return (
                           <TableCell key={session.id} className="text-center">
-                            {isEditMode && isPastSession ? (
+                            {/* ---------- FIX: show edit controls for ALL sessions when in edit mode ---------- */}
+                            {isEditMode ? (
                               <div className="flex flex-col items-center gap-1 min-w-[100px]">
                                 <Select
                                   value={currentStatus}
-                                  onValueChange={(val) => handleStatusChange(student.id, session.id, val as AttendanceStatus)}
+                                  onValueChange={(val) =>
+                                    handleStatusChange(
+                                      student.id,
+                                      session.id,
+                                      val as AttendanceStatus
+                                    )
+                                  }
                                 >
                                   <SelectTrigger className="h-7 w-24 text-xs">
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="present">Present</SelectItem>
-                                    <SelectItem value="absent">Absent</SelectItem>
-                                    <SelectItem value="absent_with_reason">Absent (Reason)</SelectItem>
+                                    <SelectItem value="present">
+                                      Present
+                                    </SelectItem>
+                                    <SelectItem value="absent">
+                                      Absent
+                                    </SelectItem>
+                                    <SelectItem value="absent_with_reason">
+                                      Absent (Reason)
+                                    </SelectItem>
                                   </SelectContent>
                                 </Select>
                                 {currentStatus === 'absent_with_reason' && (
                                   <Input
                                     placeholder="Reason..."
                                     value={editReasons[key] || ''}
-                                    onChange={(e) => setEditReasons((prev) => ({ ...prev, [key]: e.target.value }))}
+                                    onChange={(e) =>
+                                      setEditReasons((prev) => ({
+                                        ...prev,
+                                        [key]: e.target.value,
+                                      }))
+                                    }
                                     className="h-6 w-24 text-xs"
                                   />
                                 )}
                               </div>
                             ) : (
-                              <div className={`${bgColor} rounded p-1`} title={isPastSession ? `${currentStatus}${reason ? '\nReason: '+reason : ''}` : 'Future'}>
+                              // Read‑only view: show "—" for future sessions, status for past
+                              <div
+                                className={isPastSession ? `${bgColor} rounded p-1` : ''}
+                                title={
+                                  isPastSession
+                                    ? `${currentStatus}${
+                                        reason ? '\nReason: ' + reason : ''
+                                      }`
+                                    : 'Future'
+                                }
+                              >
                                 {isPastSession ? (
                                   <span className={`text-sm font-medium ${textColor}`}>
                                     {label}
-                                    {source === 'manual' && <span className="ml-0.5 text-[8px] text-amber-500">*</span>}
+                                    {source === 'manual' && (
+                                      <span className="ml-0.5 text-[8px] text-amber-500">
+                                        *
+                                      </span>
+                                    )}
                                   </span>
-                                ) : <span className="text-sm text-muted-foreground">—</span>}
+                                ) : (
+                                  <span className="text-sm text-muted-foreground">—</span>
+                                )}
                               </div>
                             )}
                           </TableCell>
                         );
                       })}
-                      <TableCell className="text-center font-mono text-emerald-500">{stats.present}</TableCell>
-                      <TableCell className="text-center font-mono text-red-500">{stats.absent + stats.absentWithReason}</TableCell>
-                      <TableCell className="text-center font-bold" style={{ fontFamily: mono, color: stats.percentage >= 80 ? '#22c55e' : stats.percentage >= 60 ? '#f59e0b' : '#ef4444' }}>
+                      <TableCell className="text-center font-mono text-emerald-500">
+                        {stats.present}
+                      </TableCell>
+                      <TableCell className="text-center font-mono text-red-500">
+                        {stats.absent + stats.absentWithReason}
+                      </TableCell>
+                      <TableCell
+                        className="text-center font-bold"
+                        style={{
+                          fontFamily: mono,
+                          color:
+                            stats.percentage >= 80
+                              ? '#22c55e'
+                              : stats.percentage >= 60
+                              ? '#f59e0b'
+                              : '#ef4444',
+                        }}
+                      >
                         {stats.percentage}%
                       </TableCell>
                     </TableRow>
@@ -371,10 +504,18 @@ export function LecturerAttendanceMatrix() {
             </Table>
           </div>
           <div className="flex items-center gap-4 mt-4 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-emerald-500/20" /> Present</span>
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-red-500/20" /> Absent</span>
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-amber-500/20" /> Absent (Reason)</span>
-            <span className="flex items-center gap-1"><span className="text-[10px]">*</span> Manual override</span>
+            <span className="flex items-center gap-1">
+              <span className="w-3 h-3 rounded bg-emerald-500/20" /> Present
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-3 h-3 rounded bg-red-500/20" /> Absent
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-3 h-3 rounded bg-amber-500/20" /> Absent (Reason)
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="text-[10px]">*</span> Manual override
+            </span>
           </div>
         </CardContent>
       </Card>

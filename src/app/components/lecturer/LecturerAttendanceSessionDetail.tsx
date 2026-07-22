@@ -4,8 +4,6 @@ import { toast } from 'sonner';
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
 } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
@@ -82,6 +80,20 @@ function generateSystemAttendance(sessionId: string, courseId: string): Record<s
   return records;
 }
 
+// ─── Helper: get week start (Monday) ───────────────────────
+function getWeekStart(date: Date): Date {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = (day === 0 ? 6 : day - 1);
+  d.setDate(d.getDate() - diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function formatDateKey(date: Date): string {
+  return date.toISOString().split('T')[0];
+}
+
 export function LecturerAttendanceSessionDetail() {
   const { courseId, type } = useParams<{ courseId: string; type?: 'lecture' | 'lab' | 'tutorial' }>();
   const navigate = useNavigate();
@@ -98,41 +110,56 @@ export function LecturerAttendanceSessionDetail() {
     return null;
   }
 
-  // ─── FIX: filter sessions by courseCode and type (inferred from title) ───
-  const sessions = useMemo(() => {
-    let filtered = CLASS_SCHEDULE.filter((s) => s.courseCode === course.code);
-    if (type) {
-      const typeLower = type.toLowerCase();
-      filtered = filtered.filter((s) =>
-        s.title.toLowerCase().includes(typeLower)
-      );
-    }
-    return filtered.sort(
-      (a, b) => new Date(a.date + 'T' + a.startTime).getTime() - new Date(b.date + 'T' + b.startTime).getTime()
-    );
-  }, [course.code, type]);
+  // ─── 1. All sessions for this course ──────────────────────
+  const allSessions = useMemo(() => {
+    return CLASS_SCHEDULE
+      .filter((s) => s.courseCode === course.code)
+      .sort((a, b) => new Date(a.date + 'T' + a.startTime).getTime() - new Date(b.date + 'T' + b.startTime).getTime());
+  }, [course.code]);
 
-  // Map week number to session
+  // ─── 2. Group by week and pick one session per week ──────
+  // We group by week start date (Monday), then assign a sequential week index.
   const sessionsByWeek = useMemo(() => {
-    const map: Record<number, any> = {};
-    sessions.forEach((s) => {
-      // Try to extract week number from title, e.g., "Lecture 5" -> 5
-      const match = s.title.match(/\d+/);
-      let week = match ? parseInt(match[0]) : 0;
-      if (!week) {
-        // Fallback: calculate week based on date relative to a known start (e.g., semester start)
-        // For demo, we'll just use index+1
-        const index = sessions.indexOf(s);
-        week = index + 1;
+    const weekMap = new Map<string, any[]>(); // key = week start date string
+    allSessions.forEach((s) => {
+      const dateObj = new Date(s.date + 'T' + s.startTime);
+      const weekStart = getWeekStart(dateObj);
+      const weekKey = formatDateKey(weekStart);
+      if (!weekMap.has(weekKey)) {
+        weekMap.set(weekKey, []);
       }
-      map[week] = s;
+      weekMap.get(weekKey)!.push(s);
     });
-    return map;
-  }, [sessions]);
 
-  const maxWeek = Math.max(12, ...Object.keys(sessionsByWeek).map(Number));
+    // Sort weeks by date
+    const sortedWeekKeys = Array.from(weekMap.keys()).sort();
+    const result: { weekIndex: number; session: any }[] = [];
 
-  // Load attendance from localStorage
+    sortedWeekKeys.forEach((weekKey, idx) => {
+      const sessions = weekMap.get(weekKey)!;
+      // Pick primary session:
+      let selected = sessions[0];
+      if (type) {
+        const typeLower = type.toLowerCase();
+        const preferred = sessions.find((s) =>
+          s.title.toLowerCase().includes(typeLower)
+        );
+        if (preferred) selected = preferred;
+        // else keep first
+      } else {
+        // No type: prefer "lecture" if exists
+        const lecture = sessions.find((s) =>
+          s.title.toLowerCase().includes('lecture')
+        );
+        if (lecture) selected = lecture;
+      }
+      result.push({ weekIndex: idx, session: selected });
+    });
+
+    return result;
+  }, [allSessions, type]);
+
+  // ─── 3. Load / initialise attendance data ────────────────
   useEffect(() => {
     if (!courseId) return;
     const storedKey = `attendance_${courseId}`;
@@ -144,7 +171,7 @@ export function LecturerAttendanceSessionDetail() {
       } catch {}
     }
     const initial: Record<string, SessionAttendance> = {};
-    sessions.forEach((s) => {
+    allSessions.forEach((s) => {
       initial[s.id] = {
         sessionId: s.id,
         records: generateSystemAttendance(s.id, courseId),
@@ -152,7 +179,7 @@ export function LecturerAttendanceSessionDetail() {
     });
     setAttendanceData(initial);
     localStorage.setItem(storedKey, JSON.stringify(initial));
-  }, [courseId, sessions]);
+  }, [courseId, allSessions]);
 
   const saveAttendance = (data: Record<string, SessionAttendance>) => {
     localStorage.setItem(`attendance_${courseId}`, JSON.stringify(data));
@@ -171,33 +198,33 @@ export function LecturerAttendanceSessionDetail() {
 
   const isPast = (s: any) => new Date(s.date + 'T' + s.startTime) <= new Date();
 
-  // Enable edit mode
+  // ─── 4. Edit mode ──────────────────────────────────────────
   const enableEditMode = () => {
     const newEditValues: Record<string, AttendanceStatus> = {};
     const newReasons: Record<string, string> = {};
-    sessions.forEach((s) => {
-      if (!isPast(s)) return;
+    sessionsByWeek.forEach(({ weekIndex, session }) => {
       studentList.forEach((student) => {
-        const key = `${student.id}-${s.id}`;
-        newEditValues[key] = getStatus(student.id, s.id);
-        newReasons[key] = getReason(student.id, s.id);
+        const key = `${weekIndex}-${student.id}`;
+        newEditValues[key] = getStatus(student.id, session.id);
+        newReasons[key] = getReason(student.id, session.id);
       });
     });
     setEditValues(newEditValues);
     setEditReasons(newReasons);
     setIsEditMode(true);
+    console.log('Edit mode enabled. Week count:', sessionsByWeek.length);
+    console.log('Edit values sample:', Object.keys(newEditValues).slice(0, 5));
   };
 
   const saveChanges = () => {
     const updatedData = { ...attendanceData };
-    sessions.forEach((s) => {
-      if (!isPast(s)) return;
+    sessionsByWeek.forEach(({ weekIndex, session }) => {
       studentList.forEach((student) => {
-        const key = `${student.id}-${s.id}`;
+        const key = `${weekIndex}-${student.id}`;
         const newStatus = editValues[key];
         if (newStatus !== undefined) {
-          if (!updatedData[s.id]) updatedData[s.id] = { sessionId: s.id, records: {} };
-          updatedData[s.id].records[student.id] = {
+          if (!updatedData[session.id]) updatedData[session.id] = { sessionId: session.id, records: {} };
+          updatedData[session.id].records[student.id] = {
             studentId: student.id,
             status: newStatus,
             source: 'manual',
@@ -208,7 +235,7 @@ export function LecturerAttendanceSessionDetail() {
       });
     });
     saveAttendance(updatedData);
-    toast.success('Attendance updated');
+    toast.success(`Attendance updated for ${sessionsByWeek.length} weeks`);
     setIsEditMode(false);
   };
 
@@ -218,26 +245,26 @@ export function LecturerAttendanceSessionDetail() {
     setEditReasons({});
   };
 
-  const handleStatusChange = (studentId: string, sessionId: string, newStatus: AttendanceStatus) => {
-    const key = `${studentId}-${sessionId}`;
+  const handleStatusChange = (weekIndex: number, studentId: string, newStatus: AttendanceStatus) => {
+    const key = `${weekIndex}-${studentId}`;
     setEditValues((prev) => ({ ...prev, [key]: newStatus }));
     if (newStatus !== 'absent_with_reason') {
       setEditReasons((prev) => ({ ...prev, [key]: '' }));
     }
   };
 
-  const handleReasonChange = (studentId: string, sessionId: string, reason: string) => {
-    const key = `${studentId}-${sessionId}`;
+  const handleReasonChange = (weekIndex: number, studentId: string, reason: string) => {
+    const key = `${weekIndex}-${studentId}`;
     setEditReasons((prev) => ({ ...prev, [key]: reason }));
   };
 
-  // Student statistics
+  // ─── 5. Student statistics (only past sessions) ──────────
   const getStudentStats = (studentId: string) => {
     let total = 0,
       present = 0,
       absent = 0,
       absentWithReason = 0;
-    sessions.forEach((s) => {
+    allSessions.forEach((s) => {
       if (!isPast(s)) return;
       total++;
       const status = getStatus(studentId, s.id);
@@ -248,16 +275,12 @@ export function LecturerAttendanceSessionDetail() {
     return { total, present, absent, absentWithReason, percentage: total > 0 ? Math.round((present / total) * 100) : 0 };
   };
 
-  // Export CSV
+  // ─── 6. Export CSV ─────────────────────────────────────────
   const handleExport = () => {
-    const headers = ['Student', ...Array.from({ length: maxWeek }, (_, i) => `Week ${i+1}`), 'Present', 'Absent', '%'];
+    const headers = ['Student', ...sessionsByWeek.map((_, idx) => `Week ${idx + 1}`), 'Present', 'Absent', '%'];
     const rows = studentList.map((student) => {
       const stats = getStudentStats(student.id);
-      const statuses = Array.from({ length: maxWeek }, (_, i) => {
-        const weekNum = i + 1;
-        const session = sessionsByWeek[weekNum];
-        return session ? getStatus(student.id, session.id) : '—';
-      });
+      const statuses = sessionsByWeek.map(({ session }) => getStatus(student.id, session.id));
       return [student.name, ...statuses, stats.present, stats.absent, `${stats.percentage}%`];
     });
     const csv = [
@@ -280,6 +303,7 @@ export function LecturerAttendanceSessionDetail() {
     s.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // ─── 7. Render ─────────────────────────────────────────────
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-2">
@@ -291,7 +315,7 @@ export function LecturerAttendanceSessionDetail() {
             {course.code} – {course.title}
           </h1>
           <p className="text-sm text-muted-foreground">
-            {type?.toUpperCase() || 'All'} Attendance Matrix (Weeks 1–{maxWeek})
+            {type?.toUpperCase() || 'All'} Attendance Matrix ({sessionsByWeek.length} weeks)
             {isEditMode ? ' – Edit mode' : ''}
           </p>
         </div>
@@ -336,9 +360,9 @@ export function LecturerAttendanceSessionDetail() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="sticky left-0 bg-card w-[180px] min-w-[160px]">Student</TableHead>
-                  {Array.from({ length: maxWeek }, (_, i) => (
-                    <TableHead key={i} className="text-center min-w-[70px]">
-                      <div className="text-sm font-semibold">Week {i + 1}</div>
+                  {sessionsByWeek.map((_, idx) => (
+                    <TableHead key={idx} className="text-center min-w-[70px]">
+                      <div className="text-sm font-semibold">Week {idx + 1}</div>
                     </TableHead>
                   ))}
                   <TableHead className="text-center">P</TableHead>
@@ -352,19 +376,15 @@ export function LecturerAttendanceSessionDetail() {
                   return (
                     <TableRow key={student.id}>
                       <TableCell className="sticky left-0 bg-card font-medium">{student.name}</TableCell>
-                      {Array.from({ length: maxWeek }, (_, i) => {
-                        const weekNum = i + 1;
-                        const session = sessionsByWeek[weekNum];
-                        if (!session) {
-                          return <TableCell key={i} className="text-center text-muted-foreground">—</TableCell>;
-                        }
+                      {sessionsByWeek.map(({ weekIndex, session }) => {
                         const isPastSession = isPast(session);
-                        const currentStatus = isEditMode && isPastSession
-                          ? editValues[`${student.id}-${session.id}`] || getStatus(student.id, session.id)
+                        const key = `${weekIndex}-${student.id}`;
+                        const currentStatus = isEditMode
+                          ? editValues[key] || getStatus(student.id, session.id)
                           : getStatus(student.id, session.id);
                         const source = getSource(student.id, session.id);
-                        const reason = isEditMode && isPastSession
-                          ? editReasons[`${student.id}-${session.id}`] || getReason(student.id, session.id)
+                        const reason = isEditMode
+                          ? editReasons[key] || getReason(student.id, session.id)
                           : getReason(student.id, session.id);
 
                         let bgColor = 'bg-secondary/20';
@@ -375,12 +395,12 @@ export function LecturerAttendanceSessionDetail() {
                         else if (currentStatus === 'absent_with_reason') { bgColor = 'bg-amber-500/20'; label = '⚠'; textColor = 'text-amber-500'; }
 
                         return (
-                          <TableCell key={i} className="text-center">
-                            {isEditMode && isPastSession ? (
+                          <TableCell key={weekIndex} className="text-center">
+                            {isEditMode ? (
                               <div className="flex flex-col items-center gap-1 min-w-[100px]">
                                 <Select
                                   value={currentStatus}
-                                  onValueChange={(val) => handleStatusChange(student.id, session.id, val as AttendanceStatus)}
+                                  onValueChange={(val) => handleStatusChange(weekIndex, student.id, val as AttendanceStatus)}
                                 >
                                   <SelectTrigger className="h-7 w-24 text-xs">
                                     <SelectValue />
@@ -394,20 +414,22 @@ export function LecturerAttendanceSessionDetail() {
                                 {currentStatus === 'absent_with_reason' && (
                                   <Input
                                     placeholder="Reason..."
-                                    value={editReasons[`${student.id}-${session.id}`] || ''}
-                                    onChange={(e) => handleReasonChange(student.id, session.id, e.target.value)}
+                                    value={editReasons[key] || ''}
+                                    onChange={(e) => handleReasonChange(weekIndex, student.id, e.target.value)}
                                     className="h-6 w-24 text-xs"
                                   />
                                 )}
                               </div>
                             ) : (
-                              <div className={`${bgColor} rounded p-1`} title={isPastSession ? `${currentStatus}${reason ? '\nReason: '+reason : ''}\nSource: ${source}` : 'No session'}>
+                              <div className={`${isPastSession ? bgColor : ''} rounded p-1`} title={isPastSession ? `${currentStatus}${reason ? '\nReason: '+reason : ''}\nSource: ${source}` : 'Future session'}>
                                 {isPastSession ? (
                                   <span className={`text-sm font-medium ${textColor}`}>
                                     {label}
                                     {source === 'manual' && <span className="ml-0.5 text-[8px] text-amber-500">*</span>}
                                   </span>
-                                ) : <span className="text-sm text-muted-foreground">—</span>}
+                                ) : (
+                                  <span className="text-sm text-muted-foreground">—</span>
+                                )}
                               </div>
                             )}
                           </TableCell>
@@ -434,4 +456,5 @@ export function LecturerAttendanceSessionDetail() {
       </Card>
     </div>
   );
+  // only the first 2 week is working
 }

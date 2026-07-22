@@ -520,30 +520,6 @@ export function StudentSettings() {
         </CardContent>
       </Card>
 
-      {/* ─── Appearance Section ───────────────────────────── */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Moon size={18} className="text-primary" />
-            <CardTitle>Appearance</CardTitle>
-          </div>
-          <CardDescription>Choose your preferred theme.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-2 flex-wrap">
-            {(['light', 'dark', 'eye'] as const).map((t) => (
-              <Button
-                key={t}
-                variant={theme === t ? 'default' : 'outline'}
-                onClick={() => handleThemeChange(t)}
-                className="capitalize"
-              >
-                {t === 'eye' ? 'Eye Care' : t}
-              </Button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

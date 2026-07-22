@@ -160,3 +160,12 @@ export interface Programme {
   status: 'Active' | 'Inactive' | 'Draft';
   courses: ProgrammeCourse[];
 }
+
+// src/types/index.ts – in the Assessment interface
+
+export interface Assessment {
+  id: string;
+  type: string;          // e.g., "Quiz 1", "Test 2"
+  maxScore: number;      // total raw marks for this assessment
+  cwWeight: number;      // percentage contribution to overall coursework (e.g., 15)
+}

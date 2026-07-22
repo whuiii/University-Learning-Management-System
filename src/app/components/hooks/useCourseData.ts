@@ -1,17 +1,12 @@
-// src/app/hooks/useCourseData.ts
-
 import { useState, useEffect } from 'react';
 import { FullCourse, Material, Assignment, Quiz, Announcement } from '../../types';
 import { COURSES } from '../../data';
 
 const STORAGE_KEY_PREFIX = 'courseData_';
 
-// ─── Helper: Build a FullCourse from static COURSES ──────
-function createFullCourseFromCourse(courseId: string): FullCourse {
+function createFullCourseFromCourse(courseId: string): FullCourse | null {
   const base = COURSES.find((c) => c.id === courseId);
-  if (!base) {
-    throw new Error(`Course with id "${courseId}" not found`);
-  }
+  if (!base) return null; // ✅ return null instead of throwing
   return {
     ...base,
     learningOutcomes: base.learningOutcomes || [],
@@ -38,19 +33,26 @@ export function useCourseData(courseId: string) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!courseId) return;
+    if (!courseId) {
+      setLoading(false);
+      setCourseData(null);
+      return;
+    }
     const key = STORAGE_KEY_PREFIX + courseId;
     const stored = localStorage.getItem(key);
-    let data: FullCourse;
+    let data: FullCourse | null;
     if (stored) {
       data = JSON.parse(stored);
     } else {
       data = createFullCourseFromCourse(courseId);
-      localStorage.setItem(key, JSON.stringify(data));
+      if (data) {
+        localStorage.setItem(key, JSON.stringify(data));
+      }
     }
     setCourseData(data);
     setLoading(false);
   }, [courseId]);
+
 
   const updateCourseData = (newData: FullCourse | ((prev: FullCourse) => FullCourse)) => {
     setCourseData((prev) => {

@@ -954,3 +954,4 @@ for (let week = 0; week < semesterWeeks; week++) {
     });
   });
 }
+
