@@ -9,3 +9,4 @@ export { AdminAuditLogs } from './AdminAuditLogs';
 export { AdminReports } from './AdminReports';
 export { AdminSystemMonitor } from './AdminSystemMonitor';
 export { AdminSettings } from './AdminSettings';
+export { AdminProgrammeManagement } from './AdminProgrammeManagement';

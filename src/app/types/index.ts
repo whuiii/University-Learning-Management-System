@@ -132,3 +132,31 @@ export interface ClassSchedule {
     address: string;
   };
 }
+
+// ─── Programme Management ──────────────────────────────────
+
+export interface Skill {
+  id: string;
+  name: string;
+  category: 'technical' | 'soft' | 'domain';
+}
+
+// Renamed to avoid conflict with existing Course
+export interface ProgrammeCourse {
+  id: string;
+  code: string;
+  name: string;
+  credits: number;
+  year: number;
+  skills: string[]; // skill ids
+}
+
+export interface Programme {
+  id: string;
+  name: string;
+  faculty: string;
+  duration: string;
+  activeStudents: number;
+  status: 'Active' | 'Inactive' | 'Draft';
+  courses: ProgrammeCourse[];
+}

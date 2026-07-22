@@ -17,6 +17,7 @@ import {
   AdminReports,
   AdminSystemMonitor,
   AdminSettings,
+  AdminProgrammeManagement
 } from './components/admin';
 import { CoursesView, CourseDetailView } from './components/courses';
 import { AssignmentsView, AssignmentDetailView } from './components/assignments';
@@ -65,6 +66,7 @@ function AppRoutes() {
         <Route path="admin/roles" element={<AdminRoles />} />
         <Route path="admin/courses" element={<AdminCourses />} />
         <Route path="admin/semesters" element={<AdminSemesters />} />
+        <Route path="admin/programmes" element={<AdminProgrammeManagement />} />
         <Route path="admin/sis" element={<AdminSISIntegration />} />
         <Route path="admin/security" element={<AdminSecurity />} />
         <Route path="admin/audit" element={<AdminAuditLogs />} />

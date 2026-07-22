@@ -57,6 +57,7 @@ export const roleNavConfig: Record<Role, NavItem[]> = {
     // Course Administration
     { id: 'courses-admin', label: 'Course Management', icon: BookOpen, path: '/admin/courses', section: 'Course Administration' },
     { id: 'semesters', label: 'Semesters', icon: Calendar, path: '/admin/semesters', section: 'Course Administration' },
+    { id: 'programmes', label: 'Programmes', icon: GraduationCap, path: '/admin/programmes', section: 'Course Administration' },
     // Integration & SIS
     { id: 'sis-integration', label: 'SIS Integration', icon: Database, path: '/admin/sis', section: 'System' },
     { id: 'security', label: 'Security & Access', icon: Shield, path: '/admin/security', section: 'System' },
